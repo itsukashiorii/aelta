@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Delt A Florynftfuze</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="wuthering waves shoorekeeper.jpg" type="image/png"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    /* ===== RESET & GLOBAL ===== */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      margin:0;
+      font-family:Inter,sans-serif;
+      line-height:1.55;
+      min-height:100vh;
+      overflow-x:hidden;
+      color:#fff;
+      background:#000;
+      transition:background 1.2s ease, color 1.2s ease;
+    }
+
+    /* ===== SEASON INDICATOR ===== */
+    .season-indicator{
+      position:fixed;
+      top:6px;
+      right:6px;
+      background:rgba(255,255,255,.12);
+      backdrop-filter:blur(4px);
+      padding:4px 8px;
+      border-radius:20px;
+      font-size:.65rem;
+      letter-spacing:.5px;
+      z-index:9999;
+      user-select:none;
+      box-shadow:0 0 6px rgba(0,0,0,.4);
+    }
+
+    /* ===== BACKGROUND SLIDESHOW ===== */
+    .bg-slideshow{
+      position:fixed;
+      top:0;left:0;
+      width:100%;height:100%;
+      z-index:-2;
+    }
+    .bg-slideshow img{
+      position:absolute;
+      top:0;left:0;
+      width:100%;height:100%;
+      object-fit:cover;
+      opacity:0;
+      transition:opacity 1.2s ease-in-out;
+    }
+    .bg-slideshow img.active{opacity:1}
+
+    /* ===== OVERLAY GRADIENT ===== */
+    .overlay{
+      position:fixed;
+      top:0;left:0;
+      width:100%;height:100%;
+      background:linear-gradient(
+        135deg,
+        rgba(0,0,0,.65) 0%,
+        rgba(40,40,40,.45) 50%,
+        rgba(0,0,0,.55) 100%
+      );
+      z-index:-1;
+    }
+
+    /* ===== MAIN PANEL ===== */
+    .wiki-panel{
+      width:100%;
+      max-width:980px;
+      margin:0px auto;
+      background:rgba(20,20,20,.35);
+      backdrop-filter:blur(0px) saturate(120%);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:5px;
+      overflow:hidden;
+      box-shadow:0 8px 32px rgba(0,0,0,.3);
+      position:relative;
+      z-index:1;
+    }
+
+    /* ===== HEADER ===== */
+    .wiki-header{
+      padding:18px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.25);
+      position:relative;
+    }
+    .wiki-header h1{
+      font-size:clamp(1.25rem,1rem + 1.2vw,1.8rem);
+      background:linear-gradient(90deg,#fff,#ccc);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .wiki-subtitle{
+      color:rgba(220,220,220,.9);
+      margin-top:6px;
+      font-size:.96rem;
+    }
+    .badge{
+      padding:4px 8px;
+      border-radius:5px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      font-size:.6rem;
+      margin-right:0px;
+      color:rgba(255,255,255,.85);
+      white-space:nowrap;
+    }
+
+    /* ===== SEARCH CONTAINER ===== */
+    .search-container {
+      position:absolute;
+      top:18px;
+      right:18px;
+      display:flex;
+      align-items:center;
+    }
+    .search-input {
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:2px;
+      padding:6px 12px;
+      color:#fff;
+      font-size:.85rem;
+      width:0;
+      opacity:0;
+      transition:all .3s ease;
+      outline:none;
+    }
+    .search-input.active {
+      width:200px;
+      opacity:1;
+    }
+    .search-icon {
+      color:rgba(255,255,255,.7);
+      cursor:pointer;
+      margin-left:8px;
+      transition:color .2s ease;
+    }
+    .search-icon:hover {
+      color:#fff;
+    }
+
+    /* ===== TABS ===== */
+    .wiki-tabs{
+      display:flex;
+      gap:2px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      padding:0 12px;
+      overflow-x:auto;
+      background:rgba(0,0,0,.15);
+    }
+    .wiki-tab{
+      padding:12px 14px;
+      cursor:pointer;
+      font-size:.95rem;
+      color:rgba(200,200,200,.7);
+      border-bottom:2px solid transparent;
+      transition:.18s;
+      flex:0 0 auto;
+    }
+    .wiki-tab.active{
+      color:rgba(255,255,255,.95);
+      border-bottom-color:rgba(255,255,255,.4);
+    }
+
+    /* ===== CONTENT ===== */
+    .wiki-content{padding:10px 12px 16px}
+    .wiki-tabpanel{display:none}
+    .wiki-tabpanel.active{display:block;animation:fade .28s ease}
+    @keyframes fade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ===== COLLAPSIBLE SECTIONS ===== */
+    .section{margin:12px 0;border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.03)}
+    .section .head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 14px;
+      cursor:pointer;
+      background:rgba(0,0,0,.2);
+    }
+    .section .head h2{font-size:1rem;color:rgba(255,255,255,.9)}
+    .section .body{display:none;padding:12px 14px 16px;color:rgba(230,230,230,.9);font-size:.95rem;background:rgba(0,0,0,.15)}
+    .section .body.open{display:block}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+    .card{border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:12px;background:rgba(0,0,0,.2);color:rgba(255,255,255,.9)}
+    .card img{width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
+
+    /* ===== LIGHT NOVEL ===== */
+    .ln-volume{margin-bottom:12px;border:1px solid rgba(255,255,255,.05);border-radius:12px;background:rgba(0,0,0,.15)}
+    .ln-volume-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 14px;
+      cursor:pointer;
+      font-weight:600;
+      color:rgba(255,255,255,.9);
+      background:rgba(255,255,255,.05);
+    }
+    .ln-volume-header:hover{background:rgba(255,255,255,.08)}
+    .ln-volume-body{display:none;padding:0 14px 12px}
+    .ln-volume-body.open{display:block}
+    .ln-chapter-list{list-style:none;padding-left:0}
+    .ln-chapter-list li{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer}
+    .ln-chapter-list li:hover{background:rgba(255,255,255,.05);margin:0 -14px;padding-left:14px;padding-right:14px}
+    .ln-chapter-list li:last-child{border-bottom:none}
+    .chapter-content{
+      display:none;
+      margin-top:10px;
+      padding:10px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      background:rgba(0,0,0,.3);
+      white-space:pre-wrap;
+      color:rgba(220,220,220,.95);
+      font-size:.85rem;
+    }
+    .date-badge{font-size:.75rem;color:rgba(200,200,200,.6);margin-left:6px}
+    .source-badge{
+      display:block;
+      margin-top:4px;
+      font-size:.7rem;
+      color:#6cf;
+    }
+
+    /* ===== SEARCH RESULTS ===== */
+    .search-results {
+      display:none;
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%);
+      width:90%;
+      max-width:800px;
+      max-height:80vh;
+      overflow-y:auto;
+      background:rgba(20,20,20,.95);
+      backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:16px;
+      padding:20px;
+      z-index:10000;
+      box-shadow:0 10px 40px rgba(0,0,0,.5);
+    }
+    .search-results.active {
+      display:block;
+      animation:fadeIn .3s ease;
+    }
+    .search-results-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:15px;
+      padding-bottom:10px;
+      border-bottom:1px solid rgba(255,255,255,.1);
+    }
+    .search-results-title {
+      font-size:1.2rem;
+      color:#fff;
+    }
+    .search-results-close {
+      background:none;
+      border:none;
+      color:rgba(255,255,255,.7);
+      font-size:1.5rem;
+      cursor:pointer;
+      transition:color .2s ease;
+    }
+    .search-results-close:hover {
+      color:#fff;
+    }
+    .search-result-item {
+      padding:12px;
+      margin-bottom:10px;
+      background:rgba(255,255,255,.05);
+      border-radius:8px;
+      border-left:3px solid transparent;
+      transition:all .2s ease;
+    }
+    .search-result-item:hover {
+      background:rgba(255,255,255,.08);
+      border-left-color:#6cf;
+    }
+    .search-result-item h3 {
+      font-size:1rem;
+      margin-bottom:5px;
+      color:#fff;
+    }
+    .search-result-item p {
+      font-size:.9rem;
+      color:rgba(220,220,220,.8);
+      margin-bottom:5px;
+    }
+    .search-result-context {
+      font-size:.8rem;
+      color:rgba(200,200,200,.6);
+      margin-top:5px;
+    }
+    .search-result-source {
+      font-size:.75rem;
+      color:#6cf;
+      margin-top:5px;
+    }
+    .search-result-item mark {
+      background-color:rgba(102,204,255,.3);
+      color:inherit;
+      padding:0 2px;
+      border-radius:2px;
+    }
+    .search-no-results {
+      text-align:center;
+      padding:20px;
+      color:rgba(200,200,200,.7);
+    }
+    .search-results-nav {
+      display:flex;
+      justify-content:space-between;
+      margin-top:15px;
+      padding-top:10px;
+      border-top:1px solid rgba(255,255,255,.1);
+    }
+    .search-nav-btn {
+      background:rgba(255,255,255,.1);
+      border:none;
+      border-radius:4px;
+      padding:6px 12px;
+      color:rgba(255,255,255,.8);
+      cursor:pointer;
+      transition:all .2s ease;
+    }
+    .search-nav-btn:hover:not(:disabled) {
+      background:rgba(255,255,255,.2);
+      color:#fff;
+    }
+    .search-nav-btn:disabled {
+      opacity:.5;
+      cursor:not-allowed;
+    }
+
+    /* Mini Social Bar */
+    .social-mini{
+      position:fixed;
+      bottom:10px;
+      right:10px;
+      display:flex;
+      gap:5px;
+      z-index:1000;
+    }
+    .social-mini-icon{
+      width:25px;
+      height:25px;
+      background:rgba(0,0,0,.5);
+      backdrop-filter:blur(5px);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      text-decoration:none;
+      font-size:10px;
+      transition:all .2s ease;
+    }
+    .social-mini-icon:hover{
+      background:#fff;
+      color:#000;
+      transform:scale(1.1);
+    }
+
+    /* Overlay untuk hasil pencarian */
+    .search-overlay {
+      display:none;
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,.7);
+      z-index:9999;
+    }
+    .search-overlay.active {
+      display:block;
+    }
+
+    /* Mobile */
+    @media (max-width:768px){
+      .social-mini{
+        bottom:5px;
+        right:5px;
+        gap:3px;
+      }
+      .social-mini-icon{
+        width:20px;
+        height:20px;
+        font-size:8px;
+      }
+      .search-container {
+        position:relative;
+        top:0;
+        right:0;
+        margin-top:10px;
+        justify-content:flex-end;
+      }
+      .search-input.active {
+        width:100%;
+      }
+      .search-results {
+        width:95%;
+        padding:15px;
+      }
+    }
+    
+    /* Search Suggestions Styles */
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      width: 200px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(20, 20, 20, 0.95);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      z-index: 10001;
+      display: none;
+      margin-top: 5px;
+    }
+    .search-suggestion-item {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      color: #ccc;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .search-suggestion-item:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .search-suggestion-item mark {
+      background-color: rgba(102,204,255,.3);
+      color: inherit;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Season Indicator -->
+<div class="season-indicator" id="seasonIndicator">春</div>
+
+<!-- Background Slideshow -->
+<div class="bg-slideshow" id="bgSlideshow"></div>
+<div class="overlay"></div>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="searchOverlay"></div>
+
+<!-- Search Results -->
+<div class="search-results" id="searchResults">
+  <div class="search-results-header">
+    <h2 class="search-results-title">Hasil Pencarian</h2>
+    <button class="search-results-close" id="closeSearchResults">&times;</button>
+  </div>
+  <div class="search-results-content" id="searchResultsContent"></div>
+  <div class="search-results-nav">
+    <button class="search-nav-btn" id="prevResult" disabled>Sebelumnya</button>
+    <span id="searchResultsCount">0 hasil</span>
+    <button class="search-nav-btn" id="nextResult" disabled>Selanjutnya</button>
+  </div>
+</div>
+
+<main class="wiki-panel">
+  <header class="wiki-header">
+    <h1>Delt a Florynffeatfuze</h1>
+    <div class="wiki-subtitle">misha/sasha Simp Baka ka, kimi wa.</div>
+    <div>
+      <span class="badge">The Misfit Of Demon King Academy</span>
+      <span class="badge">Alya Sometimes Hides Her Feelings in Russian</span>
+      <span class="badge">Date A Live</span>
+      <span class="badge">Takopi no Gen</span>
+      <span class="badge">"A Silent Voice" Koe no Katachi</span>
+      <span class="badge">Hametsu no Ōkoku</span>
+    </div>
+    
+    <!-- Search Container -->
+    <div class="search-container">
+      <input type="text" class="search-input" id="searchInput" placeholder="Cari...">
+      <div class="search-icon" id="searchToggle">
+        <i class="fas fa-search"></i>
+      </div>
+      <div class="search-suggestions" id="searchSuggestions">
+        <!-- Hasil saran akan muncul di sini -->
+      </div>
+    </div>
+  </header>
+
+  <nav class="wiki-tabs">
+    <div class="wiki-tab active" data-tab="maou">Maō Gakuin</div>
+    <div class="wiki-tab" data-tab="roshidere">Roshidere</div>
+    <div class="wiki-tab" data-tab="lightnovel">Light Novel</div>
+    <div class="wiki-tab" data-tab="misha">Misha Necron</div>
+    <div class="wiki-tab" data-tab="sasha">Sasha Necron</div>
+    <div class="wiki-tab" data-tab="shizuka">Shizuka Kuze</div>
+    <div class="wiki-tab" data-tab="Shōko">Shōko Nishimiya</div>
+    <div class="wiki-tab" data-tab="Doroka">Doroka</div>
+    <div class="wiki-tab" data-tab="militia">Militia</div>
+    <div class="wiki-tab" data-tab="gilieriam">Nirvana Seven Steps</div>
+    <div class="wiki-tab" data-tab="EgilGroneAngdroa">Egil Grōne Angdroa</div>
+  </nav>
+
+  <div class="wiki-content">
+    <!-- ===== Maō Gakuin ===== -->
+    <section id="tab-maou" class="wiki-tabpanel active">
+      <div class="section">
+        <div class="head"><h2>Sinopsis Lengkap</h2><span>+</span></div>
+        <div class="body">
+          <p><strong>Maō Gakuin no Futekigōsha</strong> (魔王学院の不適合者), atau dikenal dalam bahasa Inggris sebagai <strong>The Misfit of Demon King Academy</strong>, adalah sebuah seri novel ringan Jepang bergenre petualangan, fantasi, dan romantis yang ditulis oleh <strong>Shu</strong> dan diilustrasikan oleh <strong>Yoshinori Shizuma</strong>. Cerita ini awalnya dimulai sebagai novel web pada platform <em>Shōsetsuka ni Narō</em> pada April 2017 sebelum diakuisisi dan diterbitkan secara resmi oleh <strong>ASCII Media Works</strong> di bawah imprint <em>Dengeki Bunko</em> mulai Maret 2018.</p>
+
+<p>Cerita berpusat pada <strong>Anos Voldigoad</strong>, Raja Iblis Tirani yang legendaris dan paling kuat dalam sejarah. Setelah lelah dengan konflik dan pertumpahan darah yang tiada henti, ia memutuskan untuk bereinkarnasi 2000 tahun ke depan dengan harapan dapat mewariskan kedamaian kepada keturunannya.</p>
+
+<p>Namun, kenyataan yang ia temui sangatlah mengecewakan. Dunia yang ia bangun telah melupakan masa lalunya yang kelam. Keturunannya, ras iblis, telah menjadi lemah dan berpuas diri, sementara sihir sendiri mengalami kemunduran yang drastis. Lebih parahnya lagi, legenda tentangnya sebagai pahlawan yang baik hati telah sepenuhnya menyimpang dari kebenaran.</p>
+
+<p>Anos kemudian mendaftar di <em>Maō Gakuin</em> (Akademi Raja Iblis), sebuah institusi yang dibangun untuk mengidentifikasi dan mendidik sang Raja Iblis yang diyakini akan bereinkarnasi. Namun, alat uji akademi gagal mengenali tingkat kekuatannya yang tak terbatas, sehingga mereka secara keliru mencapnya sebagai "<strong>futekigōsha</strong>" (不適合者) atau "yang tidak cocok" — seorang murid yang tidak berbakat dan misfit.</p>
+
+<p>Bersama dengan sekelompok teman baru, termasuk <strong>Misha Necron</strong> yang misterius dan pendiam, serta saudara kembarnya <strong>Sasha Necron</strong> yang cerewet dan pemberani, Anos bertekad untuk naik dalam hierarki akademi yang penuh dengan politik dan konspirasi. Dengan sikapnya yang percaya diri dan kekuatannya yang mampu menantang bahkan para dewa dan takdir itu sendiri, Anos membongkar konspirasi jahat, mengungkap pengkhianatan, dan melawan musuh-musuh lama yang kembali bangkit, semua sambil berusaha membawa dunia menuju perdamaian yang ia impikan — meskipun caranya seringkali melibatkan kehancuran dan kekacauan dalam skala yang masif.</p>
+
+<p>Kisah ini tidak hanya tentang aksi dan kekuatan yang luar biasa, tetapi juga menjelajahi tema-tema seperti identitas, memori, warisan, dan makna sebenarnya dari perdamaian. Serial ini terkenal dengan protagonisnya yang sangat <em>overpowered</em> serta plot twists yang mengejutkan yang mengubah persepsi penonton terhadap karakter dan dunia yang diceritakan.</p>
+
+<p>Karya ini telah melahirkan franchise yang sukses, termasuk adaptasi manga oleh <strong>Kayaharuka</strong> (hingga 4 volume) dan adaptasi anime yang sangat populer produksi <strong>Silver Link</strong>. Musim pertama anime tayang pada tahun 2020 (13 episode), diikuti oleh Musim Kedua yang ditayangkan dalam dua bagian: Part 1 pada awal 2023 dan Part 2 pada April 2024.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="head"><h2>Karakter Utama</h2><span>+</span></div>
+        <div class="body">
+          <div class="grid">
+            <div class="card"><img src="https://via.placeholder.com/300x150?text=Anos+Voldigoad" alt="Anos"><b>Anos Voldigoad</b><br>Raja Iblis legendaris yang bereinkarnasi.</div>
+            <div class="card"><img src="https://via.placeholder.com/300x150?text=Misha+Necron" alt="Misha"><b>Misha Necron</b><br>Siswi pendiri yang ramah &amp; setia.</div>
+            <div class="card"><img src="https://via.placeholder.com/300x150?text=Sasha+Necron" alt="Sasha"><b>Sasha Necron</b><br>Kakak Misha, awalnya bermusuhan.</div>
+            <div class="card"><img src="https://via.placeholder.com/300x150?text=Lay+Glanzudlii" alt="Lay"><b>Lay Glanzudlii</b><br>Pemegang pedang legendaris.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Roshidere ===== -->
+    <section id="tab-roshidere" class="wiki-tabpanel">
+      <div class="section">
+        <div class="head"><h2>Sinopsis Lengkap</h2><span>+</span></div>
+        <div class="body">
+          <p><strong>Alya Sometimes Hides Her Feelings in Russian</strong> oleh <strong>SunSunSun</strong> &amp; <strong>Momoco</strong>. Awalnya dua cerita pendek Mei 2020 di <em>Shōsetsuka ni Narō</em>.</p>
+          <p>Kuze Masachika—siswa SMA yang fasih bahasa Rusia—menyadari bahwa teman sebangkunya Alya sering berbisik kepadanya dalam bahasa Rusia… namun ia pura-pura tidak mengerti.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="head"><h2>Karakter Utama</h2><span>+</span></div>
+        <div class="body">
+          <div class="grid">
+            <div class="card"><img src="https://via.placeholder.com/300x150?text=Alya" alt="Alya"><b>Alisa Mikhailovna Kujou (Alya)</b><br>Siswa Rusia-Jepang populer.</div>
+            <div class="card"><img src="https://via.placeholder.com/300x150?text=Masachika" alt="Masachika"><b>Kuze Masachika</b><br>Paham Rusia, pura-pura tidak tahu.</div>
+            <div class="card"><img src="https://via.placeholder.com/300x150?text=Yuki" alt="Yuki"><b>Yuki Suou</b><br>Sahabat Masachika.</div>
+            <div class="card"><img src="https://via.placeholder.com/300x150?text=Maria" alt="Maria"><b>Maria Mikhailovna Kujou</b><br>Saudara Alya.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Light Novel (3-Tanggal) ===== -->
+    <section id="tab-lightnovel" class="wiki-tabpanel">
+      <div class="section">
+        <div class="head"><h2>Maō Gakuin no Futekigōsha (3-Tanggal)</h2><span>+</span></div>
+        <div class="body"><div id="maou-ln"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="head"><h2>Alya Sometimes Hides Her Feelings in Russian (3-Tanggal)</h2><span>+</span></div>
+        <div class="body"><div id="roshidere-ln"></div></div>
+      </div>
+    </section>
+
+    <!-- ===== Misha Necron ===== -->
+    <section id="tab-misha" class="wiki-tabpanel">
+      <div class="section">
+    <div class="head">
+  <h2>Profil</h2>
+  <small>Ditambahkan pada: Jumat, 22 Agustus 2025 pukul 15.5 WIB</small>
+  <span>+</span>
+</div>
+    <div class="body">
+      <p><strong>Misha Necron</strong> (ミーシャ・ネクロン) adalah salah satu tokoh utama wanita dalam <em>Maō Gakuin no Futekigōsha</em>. Ia adalah adik kembar <strong>Sasha Necron</strong> dari keluarga Necron. Meski secara genetik adalah iblis murni, ia diperlakukan sebagai iblis campuran karena diciptakan melalui Dino Jixes.</p>
+      <ul>
+        <li><strong>Status:</strong> Hidup</li>
+        <li><strong>Asal:</strong> Dilhade</li>
+        <li><strong>Jenis:</strong> Iblis (Demon)</li>
+        <li><strong>Usia:</strong> 14 (Vol. 1), 15 (setelah Vol. 1)</li>
+        <li><strong>Gender:</strong> Perempuan</li>
+        <li><strong>Rambut:</strong> Putih</li>
+        <li><strong>Mata:</strong> Hijau muda</li>
+        <li><strong>Alias:</strong> Witch of Destruction's Sister, Goddess of Creation (sebelumnya)</li>
+        <li><strong>Keluarga:</strong> Anos Voldigoad (leluhur), Ivis Necron (leluhur langsung), Sasha Necron (kakak kembar), Aisha Necron (fusion dengan Sasha)</li>
+        <li><strong>Afiliasi:</strong> Keluarga Necron, Akademi Raja Iblis (kelas 1-2)</li>
+        <li><strong>Debut:</strong> LN Vol.1 / Manga Ch.1 / Anime Ep.1</li>
+        <li><strong>Pengisi Suara:</strong> Tomori Kusunoki (JP), Brianna Knickerbocker (EN)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Penampilan</h2><span>+</span></div>
+    <div class="body">
+      <p>Misha memiliki rambut putih pendek yang berantakan dengan poni panjang di depan, mata hijau muda yang besar, kulit pucat, dan tubuh yang sedikit lebih tinggi dan berlekuk daripada Sasha. Seragamnya adalah seragam putih untuk iblis campuran dengan lencana Heksagram, dua pita rambut dengan berlian blue di ujungnya, kaus kaki abu-abu panjang, dan sepatu bot putih.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Kepribadian</h2><span>+</span></div>
+    <div class="body">
+      <p>Misha adalah gadis pendiam yang berbicara dalam kalimat pendek dan tidak terlalu asertif, terutama dibandingkan dengan kakak kembarnya, Sasha. Karena dilabeli sebagai "boneka sihir", ia dijauhi oleh iblis lain, membuatnya merasa kesepian dan terisolasi. Misha tahu bahwa ia akan menghilang pada ulang tahunnya yang ke-15, jadi ia ingin membuat beberapa kenangan sebelum berhenti ada. Ia sangat menghargai pertemanannya dengan Anos, teman pertamanya. Misha juga sadar akan perasaan orang lain, dan bisa melihat bahwa Sasha tidak benar-benar membencinya meskipun tindakan Sasha menunjukkan sebaliknya.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Sejarah</h2><span>+</span></div>
+    <div class="body">
+      <p>Dalam upaya menciptakan wadah yang kuat untuk Raja Iblis bereinkarnasi, Ivis Necron menggunakan Dino Jixes pada Sasha yang belum lahir untuk membelah sumbernya menjadi dua, yang mengakibatkan kelahiran saudari kembar. Karena sumber tidak bisa tetap terpisah selamanya, keduanya akhirnya akan kembali ke bentuk aslinya. Hanya Sasha yang seharusnya memiliki kepribadian, tetapi Misha secara ajaib mengembangkan kepribadiannya sendiri. Namun, karena dianggap tidak penting dan akhirnya akan menghilang pada ulang tahun kelima belas mereka, Misha diabaikan oleh keluarga mereka dan dibesarkan secara terpisah. Berkat bantuan Anos, takdir mereka berubah dan kedua saudari itu tetap hidup sebagai kembar sejati. Terungkap kemudian bahwa Misha adalah reinkarnasi dari Dewi Penciptaan Militia yang dibunuh oleh Arcana.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Kemampuan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Kekuatan Sihir Besar:</strong> Memiliki kapasitas sihir sekitar 1.000 kali lipat dari siswa lain yang mengikuti ujian masuk. Setelah mendapatkan sumber yang lengkap, kemampuan magis terpendam Misha dikeluarkan, semakin memperkuatnya.</li>
+        <li><strong>Magic Eyes yang Perseptif:</strong> Matanya jauh lebih perseptif daripada Magic Eyes rata-rata. Dapat melihat emosi dan perasaan orang lain bahkan ketika mereka mencoba menyembunyikan perasaan sejati mereka.</li>
+        <li><strong>Ahli Sihir Penciptaan:</strong> Menunjukkan bakat besar dengan sihir penciptaan, mampu membangun tiga Kastil Raja Iblis selama ujian oposisi kelompok melawan Sasha.</li>
+        <li><strong>Penciptaan Pseudo-Delsgade:</strong> Dapat memperkuat sihir penciptaan dengan membuat pseudo-Demon Castle Delsgade, yang inferior dengan yang asli tetapi masih memiliki kekuatan ilahi.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Sihir</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Magic Eyes of Creation</li>
+        <li>Iris</li>
+        <li>Schade</li>
+        <li>Je Grade</li>
+        <li>Dino Jixes</li>
+        <li>Zect (Contract Creation)</li>
+        <li>Fless (Flight)</li>
+        <li>Gatom (Teleportation)</li>
+        <li>Silica (Reincarnation)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Perlengkapan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Lotus Ice Ring - cincin es daun teratai yang pernah dikenakan Misha</li>
+        <li>Magic Model Ring - cincin model sihir</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Trivia</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Nama keluarga "Necron" kemungkinan berasal dari awalan "necro-" yang berarti mayat atau mati.</li>
+        <li>Nama "Misha" bisa berasal dari nama bayi Slavia: hadiah dari Tuhan.</li>
+        <li>Aptitudenya meningkat setelah dia mendapatkan sumber lengkap dengan menyatukan sumber dirinya sekarang dengan sumber dirinya di masa lalu.</li>
+        <li>Memiliki hobi membuat model sihir untuk dijual di toko model sihir dengan menggunakan Iris.</li>
+        <li>Misha menyukai kucing.</li>
+        <li>Dapat bergabung dengan Sasha menjadi <strong>Aisha</strong> melalui Dino Jixes.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Kutipan</h2><span>+</span></div>
+    <div class="body">
+      <blockquote>"Aku tidak pernah ada sejak awal. Aku hanya kembali ke keadaan semula. Aku tidak akan mati; aku hanya akan menghilang." — Misha kepada Anos Voldigoad</blockquote>
+    </div>
+  </div>
+</section>
+    
+    <section id="tab-sasha" class="wiki-tabpanel">
+  <div class="section">
+    <div class="head">
+  <h2>Profil</h2>
+  <small>Ditambahkan pada: Jumat, 22 Agustus 2025 pukul 14.59 WIB</small>
+  <span>+</span>
+</div>
+    <div class="body">
+      <p><strong>Sasha Necron</strong> (サーシャ・ネクロン) adalah salah satu tokoh utama wanita dalam <em>Maō Gakuin no Futekigōsha</em>. Ia adalah kakak kembar <strong>Sasha Necron</strong> sekaligus pewaris generasi ke-16 keluarga Necron. Dijuluki sebagai <em>Witch of Destruction</em>, ia memiliki <strong>Magic Eyes of Destruction</strong> yang mampu menghancurkan apapun.</p>
+      <ul>
+        <li><strong>Status:</strong> Hidup</li>
+        <li><strong>Asal:</strong> Dilhade</li>
+        <li><strong>Jenis:</strong> Iblis (Demon)</li>
+        <li><strong>Usia:</strong> 14 (Vol. 1), 15 (setelah Vol. 1)</li>
+        <li><strong>Gender:</strong> Perempuan</li>
+        <li><strong>Rambut:</strong> Pirang</li>
+        <li><strong>Mata:</strong> Biru</li>
+        <li><strong>Alias:</strong> Witch of Destruction</li>
+        <li><strong>Keluarga:</strong> Anos Voldigoad (leluhur), Ivis Necron (leluhur langsung), Sasha Necron (adik kembar), Aisha Necron (fusion dengan Misha)</li>
+        <li><strong>Afiliasi:</strong> Keluarga Necron, Akademi Raja Iblis (kelas 1-2, Cohort of Chaos)</li>
+        <li><strong>Debut:</strong> LN Vol.1 / Manga Ch.3 / Anime Ep.2</li>
+        <li><strong>Pengisi Suara:</strong> Yūko Natsuyoshi (JP), Kayli Mills (EN)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Penampilan</h2><span>+</span></div>
+    <div class="body">
+      <p>Sasha memiliki rambut pirang panjang bergaya twin tails dengan pita hitam beraksen kuning, mata biru, tubuh mungil dan ramping. Seragamnya adalah seragam hitam untuk bangsawan iblis dengan lencana Heksagram, kaus kaki hitam panjang dengan ikatan merah, serta sepatu boot hak tinggi.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Kepribadian</h2><span>+</span></div>
+    <div class="body">
+      <p>Sasha awalnya arogan dan sombong, sering meremehkan orang lain karena status keturunannya. Meski begitu, ia pemimpin yang cerdas, penuh strategi, dan dipercaya bawahannya. Di balik sikap kerasnya terhadap Misha, sebenarnya ia sangat menyayangi adiknya dan rela berkorban demi menyelamatkannya. Sasha juga memiliki sifat <em>tsundere</em>, sulit jujur dengan perasaannya, terutama pada Anos Voldigoad yang kemudian menjadi orang yang ia kagumi dan cintai.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Sejarah</h2><span>+</span></div>
+    <div class="body">
+      <p>Ketika lahir, Sasha menjadi objek eksperimen Ivis Necron yang menggunakan sihir <strong>Dino Jixes</strong> untuk membelah sumbernya menjadi dua, sehingga lahirlah Misha Necron sebagai adik kembar. Menurut rencana keluarga, pada usia 15 tahun, Misha seharusnya kembali menyatu dengan Sasha dan menghilang. Karena tak ingin kehilangan adiknya, Sasha menciptakan sihir <strong>Zexis</strong> untuk menyamakan sumber dengan Misha, dan <strong>Delt</strong> untuk menjadikan Misha sebagai "asli". Demi rencana ini, ia berpura-pura membenci Misha agar Misha bisa menolak dirinya. Namun berkat bantuan Anos, takdir mereka berubah dan kedua saudari itu tetap hidup sebagai kembar sejati.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Kemampuan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Kekuatan Sihir Besar:</strong> Diakui sebagai jenius generasi Chaos, kekuatannya meningkat setelah sumbernya lengkap.</li>
+        <li><strong>Teori Mantra:</strong> Mampu menciptakan sihir baru seperti <em>Zexis</em> dan <em>Delt</em>.</li>
+        <li><strong>Ahli Sihir Kehancuran:</strong> Pemilik <em>Magic Eyes of Destruction</em>, mampu menghancurkan materi dan sihir, bahkan menguasai <em>Vebzud</em> yang dulunya hanya bisa digunakan Anos.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Sihir</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Magic Eyes of Destruction</li>
+        <li>Jio Graze</li>
+        <li>Gresde</li>
+        <li>Je Grade</li>
+        <li>Dien</li>
+        <li>Vebzud</li>
+        <li>Dino Jixes</li>
+        <li>Delt</li>
+        <li>Zexis</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Perlengkapan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Phoenix Mantle / Robe – jubah pemulih api suci yang pernah dikenakan Sasha</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Trivia</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Nama keluarga "Necron" kemungkinan berasal dari "necro" (mayat) + n, sesuai tema hidup-mati Ivis.</li>
+        <li>Sasha adalah keturunan ke-16 keluarga Necron.</li>
+        <li>Aptitudenya meningkat setelah sumber masa kini dan masa lalunya menyatu.</li>
+        <li>Tidak suka bangun pagi dan lemah terhadap alkohol.</li>
+        <li>Dapat bergabung dengan Misha menjadi <strong>Aisha</strong> melalui Dino Jixes.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section">
+    <div class="head"><h2>Kutipan</h2><span>+</span></div>
+    <div class="body">
+      <blockquote>"Aku akan mengubahnya. Aku akan menghancurkan takdir di mana kau harus mati." — Sasha kepada Misha</blockquote>
+    </div>
+  </div>
+</section>
+<section id="tab-shizuka" class="wiki-tabpanel">
+  <div class="section">
+    <div class="head">   <h2>Profil</h2>   <small>Ditambahkan pada: Jumat, 22 Agustus 2025 pukul 15.24 WIB</small>   <span>+</span> </div>
+    <div class="body">
+      <p><strong>Shizuka Kuze</strong> (久世しずか｜Kuze Shizuka) adalah tokoh utama perempuan dalam <em>Takopi's Original Sin</em>. Ia digambarkan sebagai anak yang trauma akibat bullying, keluarga broken, dan kehilangan hewan peliharaan kesayangan, namun tetap memiliki hati yang lembut dan mampu membentuk ikatan dengan alien Takopi.</p>
+      <ul>
+        <li><strong>Status:</strong> Hidup</li>
+        <li><strong>Asal:</strong> Jepang</li>
+        <li><strong>Jenis:</strong> Manusia</li>
+        <li><strong>Usia:</strong> 10 (SD 4) → 16 (SMA 1)</li>
+        <li><strong>Gender:</strong> Perempuan</li>
+        <li><strong>Rambut:</strong> Hitam semi-panjang</li>
+        <li><strong>Mata:</strong> Hitam dengan double eyelids</li>
+        <li><strong>Alias:</strong> "Gadis yang tak tersenyum"</li>
+        <li><strong>Keluarga:</strong> Ibu (bekerja di Kyabakura), Ayah (tinggal di Tokyo), Chappy (anjing peliharaan)</li>
+        <li><strong>Afiliasi:</strong> Sekolah dasar & menengah di kota asal</li>
+        <li><strong>Debut:</strong> Anime: Takopi's Original Sin (2025)</li>
+        <li><strong>Pengisi Suara:</strong> Reina Ueda (JP)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Penampilan</h2><span>+</span></div>
+    <div class="body">
+      <p>Shizuka memiliki rambut hitam semi-panjang, wajah dengan bekas memar akibat bullying, dan pakaian yang lusuh karena kondisi ekonomi keluarganya (kemeja putih besar, celana biru cerah, sepatu kets putih yang kotor). Ransel sekolahnya juga terlihat rusak dan penampilannya cenderung kumal dan letih. Meski begitu, ia memiliki kecantikan alami yang memikat, bahkan alien Takopi pun terkesan.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Kepribadian</h2><span>+</span></div>
+    <div class="body">
+      <p>Shizuka dikenal sebagai "gadis yang tak tersenyum" karena trauma masa kecil dan lingkungan yang keras. Ia sering terlihat apatis dan pendiam, tetapi di dekat anjing kesayangannya, Chappy, ia menunjukkan senyum yang tulus. Shizuka mampu bersikap cerdas dan adaptif dalam situasi sulit, tetapi kehilangan Chappy membuatnya jatuh ke depresi dan perilaku ekstrem. Meskipun mengalami hal mengerikan, pada akhirnya ia menunjukkan sifat lembut dan peduli pada Takopi dan orang-orang terdekatnya.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Sejarah / Timeline</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>2016 (SD kelas 4):</strong> Hidup sendiri dengan ibu yang sibuk, menerima bullying dari Marina Kirarazaka, menemui Takopi, dan mulai membentuk ikatan dengan anjing Chappy.</li>
+        <li><strong>Hilangnya Chappy:</strong> Chappy pergi atau meninggal, Shizuka jatuh ke depresi mendalam, mulai mencoba metode ekstrem termasuk percobaan bunuh diri dengan Happy Ribbon Takopi.</li>
+        <li><strong>Konfrontasi dengan Marina:</strong> Setelah konflik dan kekerasan, Takopi mencoba menyelamatkannya dengan Happy Camera, Marina akhirnya meninggal secara tidak langsung.</li>
+        <li><strong>Tindakan cover-up:</strong> Shizuka dan Naoki Azuma menyembunyikan kejadian menggunakan gadget Takopi (Memory Box), beradaptasi dalam kenyatan baru.</li>
+        <li><strong>2022 (SMA 1):</strong> Shizuka mulai menerima dunia baru, menjalin kembali hubungan yang lebih baik dengan Marina dalam timeline baru, tetap mencari Chappy.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Kemampuan / Skills</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Ketahanan mental: mampu bertahan menghadapi bullying dan trauma keluarga.</li>
+        <li>Kecerdasan emosional: memahami orang lain dan menyesuaikan strategi interaksi sosial.</li>
+        <li>Adaptasi: mampu menggunakan gadget alien secara kreatif untuk bertahan hidup.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Gadget / Ability</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Happy Ribbon – alat yang digunakan dalam percobaan bunuh diri dan interaksi emosional.</li>
+        <li>Happy Camera – alat pembalik waktu yang digunakan Takopi untuk menyelamatkan Shizuka.</li>
+        <li>Memory Box – gadget untuk menyimpan benda atau "menyembunyikan" bukti kejadian penting.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Perlengkapan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Pakaian lusuh (kemeja putih, celana biru, sepatu kets) – mencerminkan kondisi ekonomi dan kehidupan sehari-hari.</li>
+        <li>Ransel sekolah rusak.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Hubungan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Takopi:</strong> Alien yang membantunya, memberikan gadget, dan menjadi teman emosional.</li>
+        <li><strong>Chappy:</strong> Anjing kesayangan yang menjadi satu-satunya sumber kebahagiaan.</li>
+        <li><strong>Ibu:</strong> Bekerja malam, jarang ada di rumah, menyebabkan Shizuka merasa diabaikan.</li>
+        <li><strong>Marina Kirarazaka:</strong> Bully utama, konflik memuncak hingga kematian tidak langsung Marina.</li>
+        <li><strong>Naoki Azuma:</strong> Terlibat dalam cover-up dan membantu Shizuka menghadapi konsekuensi.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Trivia</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Shizuka dinamai mirip Shizuka Minamoto dari Doraemon, sebagai homage.</li>
+        <li>Karakter mencerminkan dampak psikologis dari trauma masa kecil dan broken home.</li>
+        <li>Interaksi dengan Takopi menekankan tema anak-anak yang menghadapi realitas pahit melalui benda fantasi.</li>
+        <li>Fans membahas Shizuka sebagai "enchanting" atau "sinister" karena manipulasi yang tidak disengaja akibat trauma.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Kutipan</h2><span>+</span></div>
+    <div class="body">
+      <blockquote>"I'll be fine as long as I have Chappy—there's nothing else I need." — Shizuka Kuze</blockquote>
+      <blockquote>"Nothing will hurt me anymore. No matter how painful or hard it gets—" — Shizuka Kuze</blockquote>
+      <blockquote>"If Chappy is alive, then maybe magic does exist after all." — Shizuka Kuze</blockquote>
+    </div>
+  </div>
+</section>
+<section id="tab-Shōko" class="wiki-tabpanel">
+  <div class="section">
+    <div class="head">   <h2>Profil</h2>   <small>Ditambahkan pada: Jumat, 22 Agustus 2025 pukul 15.24 WIB</small>   <span>+</span> </div>
+    <div class="body">
+      <p><strong>Shōko Nishimiya</strong> (西宮 硝子 / Nishimiya Shōko) adalah protagonis perempuan dari <em>Koe no Katachi (A Silent Voice)</em>. Ia lahir dengan gangguan pendengaran berat dan sepanjang masa kecilnya kerap kesulitan berkomunikasi dan terhubung dengan orang lain. Perjalanannya menggambarkan pemulihan diri, keberanian untuk hidup, dan membangun kembali relasi dengan orang-orang di sekitarnya.</p>
+      <ul>
+        <li><strong>Status:</strong> Hidup</li>
+        <li><strong>Asal:</strong> Prefektur Gifu, Jepang</li>
+        <li><strong>Jenis:</strong> Manusia</li>
+        <li><strong>Usia:</strong> 12 (debut) • 17–18 (SMA) • 20 (akhir manga)</li>
+        <li><strong>Gender:</strong> Perempuan</li>
+        <li><strong>Rambut:</strong> merah muda kusam (dusty rose), sering menutupi telinga</li>
+        <li><strong>Mata:</strong> cokelat</li>
+        <li><strong>Alias:</strong> "Shō-chan", "Shōko-chan", "Nishimiya-san"</li>
+        <li><strong>Keluarga:</strong> Yaeko (ibu), Yuzuru (adik), ayah (berpisah), nenek Ito Nishimiya (†), kakek-nenek pihak ayah</li>
+        <li><strong>Afiliasi:</strong> Suimon Elementary (sebelumnya), 2nd Elementary (sebelumnya), Pusat Bahasa Isyarat, <em>Salon Stray Cat</em> (magang/tukang cukur)</li>
+        <li><strong>Debut:</strong> Manga Bab 01 • Film (Kyoto Animation, 2016)</li>
+        <li><strong>Pengisi Suara:</strong> JP: Saori Hayami • EN: Lexi Marman‑Cowden</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Penampilan</h2><span>+</span></div>
+    <div class="body">
+      <p>Shōko berambut lurus merah muda kusam dengan iris mata cokelat besar yang memberi kesan lembut. Saat anak-anak, rambutnya bob; saat remaja, panjang hingga dada. Telinga kanannya menyisakan bekas luka di cuping akibat insiden alat bantu dengar; pendengaran kanan hilang total, sementara kiri menggunakan alat bantu dengar. Seragam sekolahnya: blazer biru tua, blouse putih dengan pita biru, rompi krem, rok plaid biru‑putih, sepatu cokelat. Di luar sekolah ia kerap memakai atasan putih/biru, jaket ringan, gaun kasual, legging, hingga denim.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Kepribadian</h2><span>+</span></div>
+    <div class="body">
+      <p>Sejak kecil Shōko ingin terhubung dengan orang lain, mengekspresikannya lewat buku catatan komunikasi dan bahasa isyarat. Pengalaman dikucilkan membuatnya cenderung menyalahkan diri, menghindar, dan menutupi luka dengan senyum. Di balik itu, ia sangat penyayang, pemaaf, sabar, dan empatik—menilai tinggi kejujuran walau pahit, serta gemar membantu kebutuhan orang lain. Seiring berteman kembali dengan Shōya Ishida, Shōko berani mengekspresikan emosi (marah, sedih, bahagia), berdamai dengan masa lalu, dan menumbuhkan harga diri.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Sejarah / Timeline</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>7 Juni 1996:</strong> Lahir (zodiak Gemini).</li>
+        <li><strong>Kelas 6 SD:</strong> Pindah ke kelas Takeuchi di Suimon Elementary; mengalami perundungan (terutama oleh Shōya). Buku catatan komunikasinya dibuang; akhirnya ia pindah sekolah.</li>
+        <li><strong>~5 tahun kemudian:</strong> Bersua lagi dengan Shōya di pusat bahasa isyarat; ia mengembalikan buku catatan dan telah belajar JSL. Mereka mulai berteman, lalu membangun kembali relasi dengan sahabat lama.</li>
+        <li><strong>Insiden kembang api:</strong> Titik nadir Shōko memicu upaya penyelamatan oleh Shōya yang berujung koma; setelah pulih, keduanya saling memaafkan dan berjanji untuk "hidup".</li>
+        <li><strong>Lulus SMA → Tokyo:</strong> Shōko mengejar mimpi sebagai penata rambut, magang/ bekerja di <em>Salon Stray Cat</em>; tetap menjaga relasi dengan keluarga dan teman.</li>
+        <li><strong>Epilog:</strong> Kembali ke kampung halaman setelah menempuh studi/pekerjaan di Tokyo; hubungan dengan Shōya dibiarkan ambigu namun hangat.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Kemampuan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Bahasa Isyarat Jepang (JSL) & komunikasi non‑verbal:</strong> mengandalkan gestur, membaca bibir, dan tulisan.</li>
+        <li><strong>Empati & ketahanan mental:</strong> kemampuan memaafkan, mendengar (secara emosional), dan menenangkan orang lain.</li>
+        <li><strong>Keterampilan tata rambut:</strong> belajar/ bekerja sebagai hairdresser (pemotongan, styling dasar, pelayanan pelanggan).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Sihir / Ability</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Membaca gerak bibir</strong> dalam percakapan cepat sehari‑hari.</li>
+        <li><strong>Simbolisme visual & bahasa bunga:</strong> peka terhadap makna visual (bunga, benda, momen) sebagai ekspresi perasaan.</li>
+        <li><strong>Keteguhan untuk hidup:</strong> "keajaiban" personal—keberanian menerima diri dan melanjutkan hidup.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Perlengkapan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Alat bantu dengar</strong> (aktif di telinga kiri; kanan tidak berfungsi).</li>
+        <li><strong>Buku catatan komunikasi</strong> (dipakai sejak SD untuk menulis obrolan).</li>
+        <li><strong>Peralatan tata rambut</strong> (gunting, sisir, hair dryer) saat bekerja di salon.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Hubungan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Shōya Ishida:</strong> teman dekat sekaligus sosok yang menolongnya di titik terendah; dinamika keduanya tumbuh dari penyesalan, keberanian meminta maaf, hingga saling mendukung—status romantis dibiarkan ambigu.</li>
+        <li><strong>Yuzuru Nishimiya:</strong> adik yang super-protektif; meski sering bentrok karena caranya melindungi, keduanya sangat peduli satu sama lain.</li>
+        <li><strong>Yaeko Nishimiya:</strong> ibu yang keras demi "membuat kuat"; hubungan mencair setelah wafatnya nenek Ito dan Yuzuru bertambah dewasa.</li>
+        <li><strong>Miyoko Sahara:</strong> satu-satunya teman SD yang belajar bahasa isyarat; kembali akrab saat SMA.</li>
+        <li><strong>Naoka Ueno:</strong> relasi penuh gesekan sejak SD; berangsur membaik setelah insiden besar, menuju pertemanan "jujur".</li>
+        <li><strong>Tomohiro Nagatsuka & Satoshi Mashiba:</strong> teman kelompok film; membantu Shōko melanjutkan proyek dan membuka diri.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Trivia</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Etimologi nama:</strong> 硝 (shō, "nitre") + 子 (ko, "anak"); "硝子" juga bisa dibaca "garasu" (kaca). "Nishimiya" = 西 ("barat") + 宮 ("kuil/istana").</li>
+        <li>Ulang tahun Shōko 7 Juni; ulang tahun Shōya 6 Juni (di Jepang, 6 Juni adalah "Hari Alat Bantu Dengar").</li>
+        <li>Pengisi suara Inggris, Lexi Marman‑Cowden, juga seorang penyandang tuli.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Kutipan</h2><span>+</span></div>
+    <div class="body">
+      <blockquote>"Maaf." — Shōko Nishimiya</blockquote>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Sumber</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Koe no Katachi Wiki – Profil Shōko Nishimiya (Fandom). 0</li>
+        <li><em>A Silent Voice</em> (manga) – ringkasan karakter & epilog. 1</li>
+        <li><em>A Silent Voice</em> (film) – ringkasan plot & simbolisme (Kyoto Animation). 2</li>
+        <li>Kyoto Animation – daftar karya (studio & film). 3</li>
+      </ul>
+      <p><em>Catatan:</em> Detail usia, sekolah, hubungan, dan pekerjaan salon diringkas dari sumber-sumber di atas (manga + wiki + film).</p>
+    </div>
+  </div>
+</section>
+<section id="tab-Doroka" class="wiki-tabpanel">
+  <div class="section">
+    <div class="head">   <h2>Profil</h2>   <small>Ditambahkan pada: Jumat, 22 Agustus 2025 pukul 15.24 WIB</small>   <span>+</span> </div>
+    <div class="body">
+      <p><strong>Doroka</strong> (ドロカ / Doroka) adalah deuteragonis dari <em>Hametsu no Ōkoku (The Kingdoms of Ruin)</em>. Ia seorang penyihir bertabiat lembut yang memperjuangkan perdamaian manusia–penyihir, serta rekan perjalanan Adonis.</p>
+      <ul>
+        <li><strong>Status:</strong> Hidup</li>
+        <li><strong>Asal:</strong> — (ditangkap di kamp tawanan Kerajaan/Imperium Redia)</li>
+        <li><strong>Jenis:</strong> Penyihir (Witch)</li>
+        <li><strong>Usia:</strong> 17 tahun (Lahir 18 Maret)</li>
+        <li><strong>Gender:</strong> Perempuan</li>
+        <li><strong>Rambut:</strong> Merah muda (pink), panjang</li>
+        <li><strong>Mata:</strong> Awalnya biru; kini heterokromia (kiri biru, kanan merah—donor dari Adonis)</li>
+        <li><strong>Alias:</strong> —</li>
+        <li><strong>Keluarga:</strong> — (berhubungan dekat: Adonis)</li>
+        <li><strong>Afiliasi:</strong> Adonis (sekutu/kepercayaan)</li>
+        <li><strong>Debut:</strong> Manga Bab 1; Anime Episode 1</li>
+        <li><strong>Pengisi Suara:</strong> JP: Azumi Waki / EN: Alexis Tipton</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Penampilan</h2><span>+</span></div>
+    <div class="body">
+      <p>Doroka digambarkan sebagai penyihir muda yang cantik dengan rambut merah muda panjang dan postur ramping. Senyumnya cerah bahkan di situasi genting. Setelah pertarungan dengan Shirousagi, matanya dicungkil; kemudian ia hidup dengan heterokromia karena mendapatkan donor satu mata merah dari Adonis. Sering mengenakan pakaian khas penyihir; pada beberapa momen memakai perban/penutup mata.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Kepribadian</h2><span>+</span></div>
+    <div class="body">
+      <p>Berhati tulus, periang, optimistis, dan agak ceroboh. Doroka percaya kebencian manusia–penyihir harus diakhiri. Ia tegar membantu orang lain agar tidak menjadi beban, serta memiliki perasaan cinta yang jujur kepada Adonis.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Sejarah / Timeline</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Sebelum cerita:</strong> Di komunitas penyihir, "Sihir Cinta" miliknya dipandang hina, membuatnya trauma dan enggan memaksakan sihirnya pada orang lain.</li>
+        <li><strong>Ep. 1:</strong> Muncul sebagai tawanan perwar di kamp Imperium Redia; bertemu Adonis saat pelariannya dan menjadi sekutu dalam misi kebangkitan Chloe serta perjalanan melawan Redia.</li>
+        <li><strong>Ep. 3:</strong> Perannya dipertegas sebagai penyeimbang jalan kekerasan Adonis—ia tetap mendorong harapan dan empati.</li>
+        <li><strong>Ep. 8:</strong> Menghadapi Shirousagi; Sihir Cintanya tak mempan terhadap cyborg tersebut. Ia tetap bertarung berdampingan dengan Adonis (menerima pedang darinya).</li>
+        <li><strong>Insiden mata:</strong> Shirousagi mencungkil mata Doroka; Adonis kemudian mendonorkan salah satu matanya, membuat Doroka memiliki mata kanan merah.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Kemampuan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Daya tahan & tekad tinggi:</strong> Tetap tegar membantu orang lain di kondisi terburuk.</li>
+        <li><strong>Adaptif dalam pertarungan:</strong> Meski bukan petarung garis depan, berani bertarung (mis. menerima pedang dari Adonis saat melawan Shirousagi).</li>
+        <li><strong>Karisma & persuasi:</strong> Mencari solusi damai, mampu menenangkan situasi dan memengaruhi pilihan Adonis melalui dialog.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Sihir / Ability</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Sihir Cinta (Love Magic):</strong> Dapat membuat laki-laki jatuh cinta/terikat sehingga mengikuti perintahnya; dapat menghambat gerakan lawan.</li>
+        <li><strong>Efek <em>buff</em>:</strong> Target yang terikat dapat menerima peningkatan kekuatan fisik, kekuatan sihir, dan kelincahan.</li>
+        <li><strong>Keterbatasan:</strong> Efektif pada pria; tidak bekerja pada wanita dan dapat tak mempan pada entitas non-manusia/cyborg tertentu.</li>
+        <li><strong>Etika penggunaan:</strong> Karena trauma dan prinsipnya, Doroka sangat enggan memaksa perasaan orang lain dengan sihir ini.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Perlengkapan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Pedang:</strong> Diberikan Adonis saat menghadapi Shirousagi/Hummingbird.</li>
+        <li><strong>Perban/penutup mata:</strong> Dipakai pascainsiden mata.</li>
+        <li><strong>Pakaian penyihir:</strong> Busana khas penyihir muda (variasi gaun/jubah).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Hubungan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Adonis:</strong> Sekutu dekat dan ketertarikan romantis dua arah; Doroka jadi kompas moral bagi Adonis.</li>
+        <li><strong>Chloe:</strong> Dihormati; misi awal Doroka berhubungan dengan ingatan Adonis tentang Chloe.</li>
+        <li><strong>Shirousagi (White Rabbit):</strong> Musuh yang bertanggung jawab atas hilangnya mata Doroka.</li>
+        <li><strong>Komunitas penyihir:</strong> Sebagian merendahkannya karena sifat Sihir Cinta.</li>
+        <li><strong>Punch & kawan-kawan:</strong> Sekutu manusia yang pro-penyihir.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Trivia</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>Ulang tahun Doroka tercatat 18 Maret; umur 17 tahun saat peristiwa utama.</li>
+        <li>Pengisi suara: <em>JP</em> Azumi Waki; <em>EN</em> Alexis Tipton (Crunchyroll dub).</li>
+        <li>Perubahan warna mata (heterokromia) terjadi setelah insiden melawan Shirousagi—mata kanan merah adalah donor dari Adonis.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Kutipan</h2><span>+</span></div>
+    <div class="body">
+      <blockquote><em>(Parafrasa tema Doroka)</em> "Aku ingin manusia dan penyihir berhenti saling membenci." — Doroka</blockquote>
+      <p><small>Catatan: kutipan pendek ini ditulis sebagai parafrasa tema yang konsisten dengan penggambaran resminnya; silakan ganti dengan kutipan dialog spesifik dari episode/volume jika kamu punya transkrip resmi.</small></p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Sumber</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li>The Kingdoms of Ruin — halaman karakter Doroka (profil, usia, ulang tahun, status, kemampuan, insiden mata, debut). 0</li>
+        <li>Wikipedia: The Kingdoms of Ruin (ikhtisar serial & ringkasan peran Doroka; konteks episode). 1</li>
+        <li>Crunchyroll News — pengumuman cast Inggris (Doroka: Alexis Tipton). 2</li>
+        <li>AniList — daftar karakter & seiyuu (Doroka: Azumi Waki). 3</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section id="tab-militia" class="wiki-tabpanel">
+  <div class="section"><div class="head">   <h2>Profil</h2>   <small>Ditambahkan pada: Jumat, 22 Agustus 2025 pukul 15.24 WIB</small>   <span>+</span> </div><div class="body">
+    <p><strong>Militia</strong> (ミリティア / Miritia), Goddess of Creation dalam <em>Maou Gakuin no Futekigousha</em>. Pencipta dunia "Reincarnation World Militia".</p>
+    <ul>
+      <li><strong>Status:</strong> Reincarnated / Aktif</li>
+      <li><strong>Asal:</strong> Firmament of the Gods</li>
+      <li><strong>Jenis:</strong> Dewi / God of Creation</li>
+      <li><strong>Usia:</strong> ±700 juta tahun</li>
+      <li><strong>Gender:</strong> Perempuan</li>
+      <li><strong>Rambut:</strong> Putih</li>
+      <li><strong>Mata:</strong> Biru</li>
+      <li><strong>Alias:</strong> Goddess of Creation, Maker of the World</li>
+      <li><strong>Keluarga:</strong> Elenesia (ibu), Abernyu (adik)</li>
+      <li><strong>Reinkarnasi:</strong> sebagai Misha Necron</li>
+      <li><strong>Afiliasi:</strong> Selection Gods / Firmament of the Gods</li>
+      <li><strong>Debut:</strong> LN Vol.1 / Anime Ep.2</li>
+      <li><strong>Pengisi Suara:</strong> JP: Aoi Yūki — EN: Anairis Quiñones</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="head"><h2>Penampilan</h2><span>+</span></div><div class="body">
+    <p>Wanita anggun dengan rambit putih panjang dan mata biru cerah. Mengenakan pakaian ritual putih yang memancarkan aura suci dan agung.</p>
+  </div></div>
+
+  <div class="section"><div class="head"><h2>Kepribadian</h2><span>+</span></div><div class="body">
+    <p>Lembut, penuh kasih, peduli terhadap penderitaan dunia. Berbeda dari kebanyakan dewa, ia menyimpan empati dan ingin mencari solusi damai atas konflik.</p>
+  </div></div>
+
+  <div class="section"><div class="head"><h2>Sejarah / Timeline</h2><span>+</span></div><div class="body">
+    <p>
+      • Dilahirkan sebagai penerus Elenesia, menciptakan dunia baru.<br>
+      • Mengamati dunia penuh konflik, ia mencipta Ennessone demi keseimbangan lebih stabil.<br>
+      • Bertemu Anos; membantu menciptakan Beno Ievun guna menghentikan Great War. Pesan "see you in 2,000 years" disimpan di Delzogade.<br>
+      • Gagal menyegel God of Balance dalam Selection Trial karena pengkhianatan.<br>
+      • Tewas, lalu transforma menjadi Everastanzetta, Syrica; bereinkarnasi menjadi Misha Necron.<br>
+      • Tidak dapat menembus Beno Ievun akibat pelanggaran terhadap order-nya sendiri.<br>
+      • Dampak waktu dunia bubble: dunia ciptaan 700 juta tahun vs Silver Sea 14.000 thn.
+    </p>
+  </div></div>
+
+  <div class="section"><div class="head"><h2>Kemampuan</h2><span>+</span></div><div class="body">
+    <ul>
+      <li>Immense Magic Power (cadangan sihir nyaris tak terbatas).</li>
+      <li>Conceptual Existence (memegang tatanan dunia).</li>
+      <li>Mencipta & merekonstruksi materi dan konsep.</li>
+      <li>Kontrol siklus kelahiran & kematian di level kosmik.</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="head"><h2>Sihir / Ability</h2><span>+</span></div><div class="body">
+    <ul>
+      <li><strong>Altiertonoa – Moon of Creation:</strong> perangkat order utama penciptaan, fondasi kehidupan dan sihir.</li>
+      <li><strong>Lunar Snowdrops:</strong> serpihan salju berbentuk crescent—bekukan, ciptakan ulang, anti-magic piercing, drain energi, teleport.</li>
+      <li><strong>Lunar Eclipse of Origin:</strong> teknik terbatas dua kali seumur hidup—awal dunia & penciptaan dewi baru.</li>
+      <li><strong>Divine Eyes of Origin</strong></li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="head"><h2>Perlengkapan / Artefak</h2><span>+</span></div><div class="body">
+    <ul>
+      <li>Altiertonoa (Moon of Creation)</li>
+      <li>Syrica, Erial, dan Everastanzetta sebagai artefak hasil penyegelan & reinkarnasi</li>
+      </ul>
+  </div></div>
+
+  <div class="section"><div class="head"><h2>Trivia</h2><span>+</span></div><div class="body">
+    <ul>
+      <li>Anos menyebutnya "orang yang paling mencintai dunia." 10</li>
+      <li>Hampir seluruh dewa memprioritaskan order kendati mengabaikan manusia—Militia berbeda.</li>
+      <li>Kekuatannya melebihi kemampuan kreasi Anos karena ia pencipta dunia.</li>
+      <li>Satu-satunya dewa yang mampu menembus Beno Ievun—sebelum pelanggaran order. 11</li>
+      <li>Direkayasa untuk mengantisipasi konflik selama 2.000 tahun pasca penciptaan dunia. 12</li>
+      <li>Dendam kepada order: setelah menciptakan Ennessone, tubuhnya pun tak bisa kembali ke alam dewa. 13</li>
+      <li>Dunia ciptaannya berumur lebih dari 700 juta tahun—kontras dengan Silver Sea. 14</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="head"><h2>Kutipan</h2><span>+</span></div><div class="body">
+    <blockquote>"One day, when peace comes, remember. I was fighting here." — Militia</blockquote>
+    <blockquote>"To change the world gently." — Militia</blockquote>
+    <p style="font-size:.9em;margin-top:.4em;"><em>(Diterjemahkan dari dialog Light Novel saat ia menyentuh tembok Delzogade.) 15</em></p>
+  </div></div>
+
+  <div class="section"><div class="head"><h2>Insight Penggemar</h2><span>+</span></div><div class="body">
+    <ul>
+      <li>Militia dianggap simbol kasih, cinta, dan harapan atas dunia penuh penderitaan. 16</li>
+      <li>Dalam versi tertentu, Misha/Militia ingin menciptakan dunia tanpa order sama sekali—mereset tatanan dunia. 17</li>
+    </ul>
+  </div></div>
+
+  <div class="section"><div class="head"><h2>Sumber</h2><span>+</span></div><div class="body">
+    <ul>
+      <li>Maou Gakuin Wiki – Militia & Reincarnation World Militia halaman 18</li>
+      <li>Elenesia (ibu Militia) – Maou Gakuin Wiki 19</li>
+      <li>Penjelasan bubble world & waktu – All Fiction Battles Wiki 20</li>
+      <li>Dialog dan kutipan novel – mtlreader excerpts 21</li>
+      <li>Insight komunitas – Reddit 22</li>
+      <li>Wikipedia (ES) – Personality description 23</li>
+    </ul>
+  </div>
+</section>
+<section id="tab-gilieriam" class="wiki-tabpanel">
+  <div class="section">
+    <div class="head"><h2>Gilieriam Naviem (Nirvana Seven Steps)</h2><small>Ditambahkan pada: Jumat, 22 Agustus 2025 pukul 15.24 WIB</small><span>+</span></div>
+    <div class="body">
+      <p><strong>Gilieriam Naviem</strong> (涅槃七歩征服, *Nirvana Seven Steps Conquest*) adalah salah satu <b>mantra penghancur terkuat</b> yang dimiliki oleh <b>Anos Voldigoad</b> dalam <i>The Misfit of Demon King Academy</i>. 
+      Sihir ini terdiri dari <b>tujuh langkah</b> yang masing-masing meningkatkan kekuatan sihir Anos secara eksponensial, hingga pada langkah ketujuh, seluruh dunia dapat hancur.</p>
+
+      <h3>▸ Asal-usul</h3>
+      <ul>
+        <li><b>Pencipta:</b> Anos Voldigoad, setelah menerima <i>Egil Grone Angdroa</i> dari <i>Revalschned, God of Traces</i>.</li>
+        <li><b>Kategori:</b> <i>Origin Magic</i> — jenis sihir yang meminjam kekuatan dari entitas masa lalu yang kuat.</li>
+        <li><b>Latar Debut:</b> Pertama kali dimunculkan dalam pertempuran melawan dewa-dewa jejak (Land of Traces).</li>
+      </ul>
+
+      <h3>▸ Tujuh Langkah Penghancur</h3>
+      <ol>
+        <li><b>Langkah Pertama:</b> Melepaskan sihir terkondensasi pertama, menyebabkan getaran besar pada dunia.</li>
+        <li><b>Langkah Kedua:</b> Kekuatan meningkat tajam; efeknya bisa menghapus eksistensi makhluk lemah.</li>
+        <li><b>Langkah Ketiga:</b> Distorsi hukum alam mulai terasa; benda langit bisa hancur.</li>
+        <li><b>Langkah Keempat:</b> Serangan mampu menghapus rekaman vegetasi, tanah, dan bahkan energi kehidupan.</li>
+        <li><b>Langkah Kelima:</b> Kekuatan destruktif melonjak drastis, bahkan sihir dasar menjadi senjata pemusnah dewa.</li>
+        <li><b>Langkah Keenam:</b> Hampir semua eksistensi target lenyap tanpa sisa.</li>
+        <li><b>Langkah Ketujuh (Pemusnahan):</b> Jika dilepaskan penuh, akan menghancurkan ribuan hingga jutaan dunia — total annihilation.</li>
+      </ol>
+
+      <h3>▸ Dampak yang Merusak</h3>
+      <ul>
+        <li>Setiap langkah menghasilkan getaran semakin kuat di dunia, pertanda naiknya level sihir Anos.</li>
+        <li>Bahkan sebelum melangkah, aura awalnya sudah cukup untuk mereduksi artefak dewa menjadi abu.</li>
+        <li>Efeknya tidak terikat hukum semesta; mampu mendistorsi masa lalu dan masa depan target.</li>
+      </ul>
+
+      <h3>▸ Pengendalian Kekuatan</h3>
+      <p>Nirvana Seven Steps tidak hanya meningkatkan kekuatan, tetapi juga berfungsi sebagai sarana <b>pengendalian</b> kekuatan Anos. 
+      Anos sendiri mengakui bahwa ia sulit mengendalikan <i>Destruction Source</i>-nya. Dengan langkah-langkah ini, ia bisa menyalurkan kekuatan besar secara lebih terstruktur, meskipun setiap langkah tetap berbahaya.</p>
+
+      <h3>▸ Contoh Penggunaan</h3>
+      <ul>
+        <li>Dalam salah satu pertarungan, Anos hanya menggunakan sampai langkah kelima lalu mengulanginya dari awal, karena efeknya terlalu destruktif.</li>
+        <li>Melawan <i>God of Gears Equis</i>, langkah-langkah Gilieriam Naviem memperkuat sihir dasar (Fless, Kurst, Gijel, Synial, Dee, Grega) hingga cukup untuk menghancurkan <i>Gear of Fate</i>.</li>
+      </ul>
+
+      <h3>▸ Ringkasan</h3>
+      <p>Dengan kata lain, <i>Gilieriam Naviem</i> adalah senjata pamungkas Anos yang bukan hanya menunjukkan betapa kuatnya dia, tetapi juga memperlihatkan 
+      bahwa bahkan Raja Iblis Tirani pun membutuhkan <b>mekanisme kontrol</b> untuk menyalurkan kekuatan destruktif tanpa merusak segalanya sekaligus.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="head"><h2>Pertanyaan Penutup</h2><small>Ditambahkan pada: Jumat, 22 Agustus 2025 pukul 15.24 WIB</small><span>+</span></div>
+    <div class="body">
+      <p><b>Mengapa Anos tidak pernah melepaskan 7 langkah penuh di Dunia Militia?</b></p>
+      <p>Karena dunia Militia terlalu rapuh untuk menahan konsep kehancuran sejati ini. Energi bocoran dari tubuh Anos saja sudah cukup mengguncang dunia, 
+      apalagi Nirvana Seven Steps penuh. Jika dilepaskan, dunia akan musnah total.</p>
+      <p>Namun, dalam <i>Arc Silver Sea</i>, Anos diperkirakan akan mulai menggunakan sihir ini lebih jauh, membuka kemungkinan pertarungan yang <b>chaos</b> dan sangat epik bila diadaptasi ke anime.</p>
+    </div>
+  </div>
+</section>
+<section id="tab-EgilGroneAngdroa" class="wiki-tabpanel">
+  <div class="section">
+    <div class="head"><h2>Profil Sihir</h2><small>Ditambahkan pada: Jumat, 22 Agustus 2025 pukul 15.24 WIB</small><span>+</span></div>
+    <div class="body">
+      <p><strong>Egil Grone Angdroa</strong> (エギル・グローネ・アングドロア / <em>Egil Grōne Angdroa</em> / "World‑Destroying Magic: Egil Grone Angdroa") adalah salah satu <em>origin magic</em> penghancur tingkat terdalam (deep‑class) dari <em>The Misfit of Demon King Academy</em>. Sihir ini melepaskan api kehancuran yang ditanamkan langsung pada <em>source</em>, mampu memusnahkan dunia dan menghapus jejak keberadaan. Di era modern, sihir ini digunakan dan disempurnakan oleh Anos Voldigoad; catatan purba menyebutnya dikembangkan di Silver Water Holy Sea oleh Raja Iblis Pertama, Amur Veewither.</p>
+      <ul>
+        <li><strong>Kategori:</strong> Origin / Destruction (World‑Destroying)</li>
+        <li><strong>Pencipta:</strong> Amur Veewither (pengembang awal, Silver Sea); direplikasi/diturunkan melalui <em>Order of Traces</em> Revalschned kepada Anos</li>
+        <li><strong>Pengguna:</strong> Demon Kings of the Silver Sea (jumlah pengguna sangat langka, &lt; 10); Anos Voldigoad; Amur Veewither</li>
+        <li><strong>Debut:</strong> Light Novel (LN, arc Jiordal/Selected Eight); Anime S2 Part 2 Episode 24</li>
+        <li><strong>Tipe Efek:</strong> Serangan / Penghapusan eksistensi (destructive order)</li>
+      </ul>
+    </div>
+  </div>  <div class="section">
+    <div class="head"><h2>Asal-usul</h2><span>+</span></div>
+    <div class="body">
+      <p>Legenda Silver Water Holy Sea mencatat <em>Egil Grone Angdroa</em> sebagai sihir kehancuran kelas‑dalam yang pertama kali dikembangkan oleh Amur Veewither, Raja Iblis Pertama. Di masa Anos, jejak (<em>trace</em>) sihir ini direkonstruksi oleh Revalschned (Dewa Jejak) lalu ditanamkan ke <em>source</em> Anos sebagai kontraktor, menjadikannya mampu mengaktifkan varian yang lebih stabil. Dalam <em>Selection Trial</em> dan konflik antar dewa, sihir ini muncul sebagai "uji terbesar" yang dapat dipanggil oleh kitab jejak Azael.</p>
+    </div>
+  </div>  <div class="section">
+    <div class="head"><h2>Mekanisme & Cara Kerja</h2><span>+</span></div>
+    <div class="body">
+      <p><em>Egil Grone Angdroa</em> diklasifikasikan sebagai <strong>origin magic</strong>: ia meminjam dan memusatkan kekuatan eksistensi lampau melalui jejak (trace), lalu menanamkan benih kehancuran ke dalam <em>source</em> target. Anos sering mengombinasikannya dengan <em>enhancement spell</em> <strong>Gilieriam Naviem</strong> (涅槃七歩征服 / <em>Nirvana Seven Steps Conquest</em>) untuk menaikkan ambang kekuatannya per langkah.</p>
+      <ol>
+        <li><strong>Inisiasi Jejak:</strong> Mengakses jejak sihir melalui kontrak Revalschned; origin magic meminjam kekuatan masa lampau.</li>
+        <li><strong>Kondensasi di Source:</strong> Energi kehancuran dikondensasikan di sumber jiwa pengguna (atau target via Azael), membentuk api yang menghapus <em>order</em>.</li>
+        <li><strong>Pelepasan / Penanaman:</strong> Api kehancuran dilepas sebagai semburan kosmik atau ditanam langsung pada source lawan sehingga kehancuran berlangsung dari inti.</li>
+        <li><strong>Sinergi 7 Langkah (opsional):</strong> Aktivasi <em>Gilieriam Naviem</em> menaikkan seluruh parameter setiap langkah dan memperdalam efek destruksi.</li>
+      </ol><h3>Versi Super Lengkap — Nirvana Seven Steps (Gilieriam Naviem)</h3>
+  <p><em>Gilieriam Naviem</em> melepaskan sihir kehancuran yang dikondensasi di source, menaikkan daya tiap langkah; sebelum langkah pertama saja, <em>backlash</em> bisa meluluhkan artefak ilahi. Ringkasan efek kosmik per langkah:</p>
+  <ol>
+    <li><strong>Langkah 1:</strong> Ledakan aura penghancur; artefak ilahi rentan luluh/abu (contoh: Vertexfemblem).</li>
+    <li><strong>Langkah 2:</strong> Mantra dasar (Grega/Fless/dll.) terdorong ke tingkatan <em>god‑slaying</em>.</li>
+    <li><strong>Langkah 3:</strong> Distorsi <em>order</em> lokal; roda takdir dan domain dewa mulai retak.</li>
+    <li><strong>Langkah 4:</strong> Disjungsi hukum kausal; jejak benda/konsep terkikis.</li>
+    <li><strong>Langkah 5:</strong> Keruntuhan domain &amp; roda takdir; <em>gear of fate</em> hancur.</li>
+    <li><strong>Langkah 6:</strong> Pembalikan urutan penciptaan; bagian‑bagian dunia lenyap mengikuti <em>trace</em> penciptaan yang dihapus.</li>
+    <li><strong>Langkah 7:</strong> <em>Overkill</em>—output yang cukup untuk menghancurkan dunia hingga ribuan kali lipat (dipakai sebagai deterensi).</li>
+  </ol>
+
+  <p><em>Catatan:</em> Beberapa varian memperdalam (deepening) langkah‑langkah ini untuk melampaui batas dunia, memotong bayangan/jejak entitas dan domain sekaligus.</p>
+</div>
+
+  </div>  <div class="section">
+    <div class="head"><h2>Dampak & Skala Kekuatan</h2><span>+</span></div>
+    <div class="body">
+      <p>Daya hancur <em>Egil Grone Angdroa</em> dan sinerginya dengan <em>Gilieriam Naviem</em> mencapai tingkatan kosmologis:</p>
+      <ul>
+        <li><strong>Skala Dunia–Multi‑Dunia:</strong> Potensi menghancurkan dunia ribuan kali dengan pelepasan penuh 7 langkah.</li>
+        <li><strong>Distorsi Hukum:</strong> Menghapus jejak hingga membalik urutan "enam hari penciptaan" pada <em>land of traces</em>.</li>
+        <li><strong>Penetrasi Ilahi:</strong> Mematahkan <em>gear of fate</em> dan menggerus domain dewa (contoh: Equis).</li>
+      </ul>
+      <p>Secara praktik, Anos pernah hanya berjalan enam langkah untuk melenyapkan jejak‑jejak besar dan merobohkan wilayah jejak—sementara versi 7 langkah penuh dipertahankan sebagai opsi pamungkas.</p>
+    </div>
+  </div>  <div class="section">
+    <div class="head"><h2>Pengendalian & Kelemahan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Kendali Sulit (Origin Magic):</strong> Karena meminjam kekuatan eksistensi lampau, kestabilannya rumit; diperlukan keseimbangan <em>order</em> untuk output maksimum.</li>
+        <li><strong>Hijack oleh Origin/Trace:</strong> Pihak yang menguasai <em>order</em> jejak tertentu (mis. Liebarschend) dapat membajak aliran origin magic dan memantulkannya.</li>
+        <li><strong>Counter Spesifik:</strong> 
+          <ul>
+            <li><em>Frozen Prison of Calamity</em> (Yzak) dapat membekukan kemungkinan kerusakan fatal bahkan dari Angdroa.</li>
+            <li><em>Magic Eyes</em> Zinnia dapat "memakan" mantra sangat kuat termasuk Angdroa, menjebak lawan dalam kegelapan berlapis.</li>
+          </ul>
+        </li>
+        <li><strong>Biaya &amp; Risiko:</strong> Penanaman benih kehancuran ke source (baik target maupun pengguna via backlash) menuntut kontrol absolut; kegagalan mengakibatkan <em>source strain</em>.</li>
+      </ul>
+    </div>
+  </div>  <div class="section">
+    <div class="head"><h2>Contoh Penggunaan</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Melawan Naphta (Dewi Masa Depan):</strong> Anos menyatakan telah dua kali memakai Angdroa sebelum konfrontasi besar; dalam adaptasi anime, origin‑nature‑nya sempat dibajak.</li>
+        <li><strong>Vs. Equis (Dewa Roda Gigi):</strong> <em>Backlash</em> aktivasi <em>Gilieriam Naviem</em> sebelum langkah pertama saja meluluhkan <em>Gear Sword Vertexfemblem</em>; langkah‑langkah berikutnya menghancurkan <em>gear of fate</em>.</li>
+        <li><strong>Demonstrasi 6 Langkah:</strong> Anos berjalan enam langkah dan membalik urutan penciptaan pada <em>land of traces</em>, menghapus bagian‑bagian dunia sesuai jejaknya.</li>
+      </ul>
+    </div>
+  </div>  <div class="section">
+    <div class="head"><h2>Trivia</h2><span>+</span></div>
+    <div class="body">
+      <ul>
+        <li><strong>Arti Nama / Etimologi:</strong> Tidak ada etimologi resmi. Penulisan katakana エギル・グローネ・アングドロア mengisyaratkan nama bergaya Eropa; komunitas kerap mengaitkan "Egil" (Nama Nordik kuno), "Grone/Grōne" (kemungkinan permainan bunyi Jermanik), dan "Angdroa" (kemiripan fonetik dengan akar kata Latin/Indo‑Eropa untuk "kegelapan/anger"), namun ini <em>bersifat spekulatif</em>.</li>
+        <li><strong>Keterkaitan Silver Sea:</strong> Sering digolongkan sebagai deep‑class magic yang berasal dari Silver Water Holy Sea; pengguna sah sangat langka (&lt; 10).</li>
+        <li><strong>Sinkron dengan "Nirvana Seven Steps":</strong> Angdroa menjadi landasan energi destruktif yang dilepas per langkah di <em>Gilieriam Naviem</em>.</li>
+      </ul>
+    </div>
+  </div>  <div class="section">
+    <div class="head"><h2>Kutipan Terkait</h2><span>+</span></div>
+    <div class="body">
+      <blockquote>"Dengan setiap langkah, jejak penciptaan itu sendiri akan memudar." — (narasi tentang <em>Gilieriam Naviem</em>)</blockquote>
+    </div>
+  </div>  <div class="section">
+    <div class="head"><h2>Pertanyaan Penutup</h2><span>+</span></div>
+    <div class="body">
+      <p><b>Pertanyaan:</b> Kenapa sihir ini jarang dipakai / ditahan penggunaannya?</p>
+      <p><b>Jawaban:</b> Karena sifatnya adalah <em>origin world‑destroying</em> dengan risiko instabilitas dan konsekuensi kosmologis (membalik order, menghapus jejak). Biasanya dipakai hanya sebagai penyeimbang terakhir atau untuk mematahkan domain dewa ketika semua opsi lain gagal.</p>
+    </div>
+  </div>
+</section>
+</div>
+  </div>
+</main>
+
+      <!-- Compact Social Bar -->
+<div class="social-mini">
+  <a href="https://facebook.com" target="_blank" class="social-mini-icon" title="Facebook">
+    <i class="fab fa-facebook-f"></i>
+  </a>
+  <a href="https://twitter.com" target="_blank" class="social-mini-icon" title="Twitter">
+    <i class="fab fa-twitter"></i>
+  </a>
+  <a href="https://instagram.com" target="_blank" class="social-mini-icon" title="Instagram">
+    <i class="fab fa-instagram"></i>
+  </a>
+  <a href="https://pinterest.com" target="_blank" class="social-mini-icon" title="Pinterest">
+    <i class="fab fa-pinterest-p"></i>
+  </a>
+  <a href="https://site1.com" target="_blank" class="social-mini-icon" title="Website 1">
+    <i class="fas fa-link"></i>
+  </a>
+  <a href="https://site2.com" target="_blank" class="social-mini-icon" title="Website 2">
+    <i class="fas fa-link"></i>
+  </a>
+  </div>
+<script>
+/* ===== TABS ===== */
+const tabs = document.querySelectorAll('.wiki-tab');
+const panels = {
+  maou: document.getElementById('tab-maou'),
+  roshidere: document.getElementById('tab-roshidere'),
+  lightnovel: document.getElementById('tab-lightnovel'),
+  misha: document.getElementById('tab-misha'),
+  sasha: document.getElementById('tab-sasha'),
+  shizuka: document.getElementById('tab-shizuka'),
+  Shōko: document.getElementById('tab-Shōko'),
+  Doroka: document.getElementById('tab-Doroka'),
+  militia: document.getElementById('tab-militia'),
+  gilieriam: document.getElementById('tab-gilieriam'),
+  EgilGroneAngdroa: document.getElementById('tab-EgilGroneAngdroa')
+};
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    Object.values(panels).forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    panels[tab.dataset.tab].classList.add('active');
+  });
+});
+
+/* ===== COLLAPSIBLE SECTIONS (toggle +/−) ===== */
+document.querySelectorAll('.section .head').forEach(head => {
+  head.addEventListener('click', () => {
+    const body = head.nextElementSibling;
+    const sign = head.querySelector('span');
+    const isOpen = body.classList.contains('open');
+    // close siblings
+    head.closest('.wiki-tabpanel').querySelectorAll('.section .body').forEach(b => {
+      b.classList.remove('open');
+      b.previousElementSibling.querySelector('span').textContent = '+';
+    });
+    if (!isOpen) {
+      body.classList.add('open');
+      sign.textContent = '−';
+    } else {
+      body.classList.remove('open');
+      sign.textContent = '+';
+    }
+  });
+});
+
+/* ===== BACKGROUND SLIDESHOW ===== */
+const slideshowContainer = document.getElementById('bgSlideshow');
+const totalImages = 24;
+let currentIndex = 0;
+
+for (let i = 1; i <= totalImages; i++) {
+  const img = document.createElement('img');
+  img.src = `misha-sasha${i}.jpg`;
+  img.alt = `Shorekeeper ${i}`;
+  if (i === 1) img.classList.add('active');
+  slideshowContainer.appendChild(img);
+}
+
+function changeBackground() {
+  const images = slideshowContainer.querySelectorAll('img');
+  images[currentIndex].classList.remove('active');
+  currentIndex = (currentIndex + 1) % totalImages;
+  images[currentIndex].classList.add('active');
+}
+setInterval(changeBackground, 3000);
+
+/* ===== LIGHT NOVEL DATA (3-Tanggal) ===== */
+const maouData = [
+  {
+    volume: 1,
+    title: "Maō Gakuin no Futekigōsha",
+    release: "10 Maret 2018",
+    chapters: [
+      {
+  name: "Bab 1: Undangan dari Delzogade",
+  content: "Sebulan telah berlalu sejak Anos Voldigoad, Raja Iblis yang pernah mengguncang dunia dua ribu tahun silam, memilih untuk bereinkarnasi. Selama waktu itu ia meneliti keadaan zaman baru yang disebut sebagai 'Era Sihir'. Betapa terkejutnya ia ketika mendapati bahwa kualitas sihir zaman sekarang jauh merosot dibandingkan era mitologi yang dulu ia kuasai. Manusia bahkan hampir melupakan hakikat sejati sihir, dan tidak mengetahui keberadaan reinkarnasi. Meski lahir kembali sebagai anak manusia dari pasangan Gusta dan Isabella, Anos tetap menunjukkan bakat luar biasa sejak bayi—ia bisa berbicara, mengendalikan sihir, dan memiliki aura yang menakutkan.\n\nNamun, suatu malam kehidupan tenangnya berubah ketika seekor burung hantu misterius muncul membawa undangan resmi dari 'Akademi Raja Iblis Delzogade'. Nama itu membuatnya heran, sebab Delzogade dulunya adalah kastil pribadinya. Akademi tersebut rupanya dibangun untuk mendidik para keturunan Raja Iblis tirani agar suatu hari menjadi penguasa baru. Bahkan ada rumor bahwa pendiri sejati, yakni dirinya, akan bereinkarnasi tahun itu, sehingga semua iblis menantikan kehadiran generasi yang disebut 'Generasi Kekacauan'.\n\nAnos menyadari maksud tersembunyi di balik undangan itu: akademi tersebut dibentuk untuk mencari dirinya yang telah lahir kembali. Ia bertekad menerima undangan tersebut, bukan hanya untuk melihat seperti apa keturunannya setelah dua ribu tahun, tetapi juga untuk mengetahui bagaimana dunia iblis berkembang selama ia tiada. Ia bahkan menggunakan sihir untuk mempercepat pertumbuhannya hingga menyerupai remaja berusia enam belas tahun, agar dapat masuk ke akademi dengan mudah.\n\nNamun, ketika hendak berangkat, ia harus berhadapan dengan kekhawatiran ibunya. Isabella menolak melepas Anos yang menurutnya masih 'bayi satu bulan', meski Anos sudah membuktikan kekuatannya dengan menciptakan emas dari sihir. Ayahnya, Gusta, justru lebih mendukung keputusan Anos, meski dengan cara yang polos dan konyol. Pada akhirnya, cinta orang tua mereka tak bisa ditolak: alih-alih membiarkannya pergi sendirian, mereka memutuskan pindah bersama ke negeri iblis, Dilheid. Bagi Anos, yang di kehidupan sebelumnya tidak pernah merasakan kasih orang tua, kehangatan ini terasa asing namun menenangkan. Dengan itu, perjalanan baru sang Raja Iblis dimulai—sebuah kisah reinkarnasi, keluarga, dan takdir yang menantinya di Akademi Raja Iblis Delzogade.",
+  tanggal_rilis: { tahun: 2017, bulan: 4, tanggal: 2 },
+  tanggal_revisi: { tahun: 2017, bulan: 6, tanggal: 15 },
+  tanggal_parafrasa: { tahun: 2025, bulan: 8, tanggal: 20 },
+  sumber: "Parafrasa berdasarkan Bab 1 'Undangan dari Delzogade' di ncode.syosetu.com karya Shu (https://ncode.syosetu.com/n1578dx/)"
+},
+      {
+        name: "Chapter 1: Akademi Raja Iblis",
+        content: "Anos mendaftar ke akademi namun diolok sebagai misfit.",
+        tanggal_rilis: { tahun: 2018, bulan: 3, tanggal: 10 },
+        tanggal_revisi: { tahun: 2020, bulan: 7, tanggal: 16 },
+        tanggal_parafrasa: { tahun: 2025, bulan: 8, tanggal: 20 },
+        sumber: "Terjemahan resmi ASCII Media Works – Dengeki Bunko"
+      },
+      {
+        name: "Chapter 2: Tes Kekuatan",
+        content: "Anos menunjukkan kekuatan luar biasa dengan satu jentikan.",
+        tanggal_rilis: { tahun: 2018, bulan: 3, tanggal: 10 },
+        tanggal_revisi: { tahun: 2020, bulan: 7, tanggal: 17 },
+        tanggal_parafrasa: { tahun: 2025, bulan: 8, tanggal: 20 },
+        sumber: "Terjemahan resmi ASCII Media Works – Dengeki Bunko"
+      }
+    ]
+  },
+  {
+    volume: 2,
+    title: "Keturunan Iblis & Konflik Klan",
+    release: "10 Juli 2018",
+    chapters: [
+      {
+        name: "Prolog: Klan Necron",
+        content: "Konflik antar klan memanas; Anos turun tangan.",
+        tanggal_rilis: { tahun: 2018, bulan: 7, tanggal: 10 },
+        tanggal_revisi: { tahun: 2020, bulan: 9, tanggal: 5 },
+        tanggal_parafrasa: { tahun: 2025, bulan: 8, tanggal: 20 },
+        sumber: "Terjemahan resmi ASCII Media Works – Dengeki Bunko"
+      },
+      {
+        name: "Chapter 1: Perwar Klan",
+        content: "Perwar terbuka antar klan; Anos melindungi yang lemah.",
+        tanggal_rilis: { tahun: 2018, bulan: 7, tanggal: 10 },
+        tanggal_revisi: { tahun: 2020, bulan: 9, tanggal: 6 },
+        tanggal_parafrasa: { tahun: 2025, bulan: 8, tanggal: 20 },
+        sumber: "Terjemahan resmi ASCII Media Works – Dengeki Bunko"
+      }
+    ]
+  }
+];
+
+const roshidereData = [
+  {
+    volume: 1,
+    title: "Alya Sometimes Hides Her Feelings in Russian",
+    release: "25 Februari 2021",
+    chapters: [
+      {
+        name: "Chapter 1: Alya yang Terkenal",
+        content: "Masachika menyaksikan Alya berbicara Rusia tanpa sadar.",
+        tanggal_rilis: { tahun: 2021, bulan: 2, tanggal: 25 },
+        tanggal_revisi: { tahun: 2022, bulan: 4, tanggal: 12 },
+        tanggal_parafrasa: { tahun: 2025, bulan: 8, tanggal: 20 },
+        sumber: "Shōsetsuka ni Narō – https://ncode.syosetu.com/n1234fx/"
+      },
+      {
+        name: "Chapter 2: Bahasa Rusia yang Tidak Diterjemahkan",
+        content: "Alya terus berbisik Rusia; Masachika pura-pura tak tahu.",
+        tanggal_rilis: { tahun: 2021, bulan: 2, tanggal: 25 },
+        tanggal_revisi: { tahun: 2022, bulan: 4, tanggal: 13 },
+        tanggal_parafrasa: { tahun: 2025, bulan: 8, tanggal: 20 },
+        sumber: "Shōsetsuka ni Narō – https://ncode.syosetu.com/n1234fx/"
+      }
+    ]
+  },
+  {
+    volume: 2,
+    title: "Winter Date & Hidden Heart",
+    release: "25 Juni 2021",
+    chapters: [
+      {
+        name: "Prolog: Undangan Natal",
+        content: "Alya mengajak Masachika merayakan Natal bersama keluarganya.",
+        tanggal_rilis: { tahun: 2021, bulan: 6, tanggal: 25 },
+        tanggal_revisi: { tahun: 2022, bulan: 8, tanggal: 1 },
+        tanggal_parafrasa: { tahun: 2025, bulan: 8, tanggal: 20 },
+        sumber: "Kadokawa – Kadokawa Sneaker Bunko"
+      },
+      {
+        name: "Chapter 1: Winter Date",
+        content: "Kencan musim dingin; Alya berbisik 'Ты мне нравишься'.",
+        tanggal_rilis: { tahun: 2021, bulan: 6, tanggal: 25 },
+        tanggal_revisi: { tahun: 2022, bulan: 8, tanggal: 2 },
+        tanggal_parafrasa: { tahun: 2025, bulan: 8, tanggal: 20 },
+        sumber: "Kadokawa – Kadokawa Sneaker Bunko"
+      }
+    ]
+  }
+];
+
+/* ===== RENDER LIGHT NOVEL (3-Tanggal) ===== */
+function formatDate(d) {
+  return `${d.tahun}-${String(d.bulan).padStart(2, '0')}-${String(d.tanggal).padStart(2, '0')}`;
+}
+function renderLightNovel(containerId, data) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  data.forEach(vol => {
+    const wrap = document.createElement('div');
+    wrap.className = 'ln-volume';
+
+    const header = document.createElement('div');
+    header.className = 'ln-volume-header';
+    header.innerHTML =
+      `<span>Volume ${vol.volume} – ${vol.title} (${vol.release})</span><span>+</span>`;
+
+    const body = document.createElement('div');
+    body.className = 'ln-volume-body';
+    const list = document.createElement('ul');
+    list.className = 'ln-chapter-list';
+
+    vol.chapters.forEach(ch => {
+      const li = document.createElement('li');
+      li.innerHTML =
+        `${ch.name}
+        <span class="date-badge">rilis:${formatDate(ch.tanggal_rilis)}</span>
+        <span class="date-badge">revisi:${formatDate(ch.tanggal_revisi)}</span>
+        <span class="date-badge">ditambahkan:${formatDate(ch.tanggal_parafrasa)}</span>
+        <span class="source-badge">${ch.sumber}</span>`;
+
+      li.addEventListener('click', () => {
+        const content = li.querySelector('.chapter-content');
+        const open = content.style.display === 'block';
+        document.querySelectorAll('.chapter-content').forEach(c => c.style.display = 'none');
+        if (!open) content.style.display = 'block';
+      });
+
+      const content = document.createElement('div');
+      content.className = 'chapter-content';
+      content.textContent = ch.content;
+      li.appendChild(content);
+      list.appendChild(li);
+    });
+
+    body.appendChild(list);
+    wrap.appendChild(header);
+    wrap.appendChild(body);
+    container.appendChild(wrap);
+
+    header.addEventListener('click', () => {
+      const open = body.classList.contains('open');
+      body.classList.toggle('open');
+      header.querySelector('span:last-child').textContent = open ? '+' : '−';
+    });
+  });
+}
+
+renderLightNovel('maou-ln', maouData);
+renderLightNovel('roshidere-ln', roshidereData);
+
+/* ===== JAPANESE SEASON CALENDAR ===== */
+const seasonIndicator = document.getElementById('seasonIndicator');
+const seasons = ['春','夏','秋','冬'];
+const seasonColors = ['#ff5f5f','#ffaa00','#8bc34a','#29b6f6'];
+const now = new Date();
+const month = now.getMonth() + 1;
+let seasonIndex;
+if ([3,4,5].includes(month)) seasonIndex = 0; // Spring
+else if ([6,7,8].includes(month)) seasonIndex = 1; // Summer
+else if ([9,10,11].includes(month)) seasonIndex = 2; // Autumn
+else seasonIndex = 3; // Winter
+seasonIndicator.textContent = seasons[seasonIndex];
+seasonIndicator.style.color = seasonColors[seasonIndex];
+document.body.style.background = `linear-gradient(to bottom, ${seasonColors[seasonIndex]}33, #000)`;
+
+/* ===== SEARCH FUNCTIONALITY ===== */
+const searchInput = document.getElementById('searchInput');
+const searchToggle = document.getElementById('searchToggle');
+const searchResults = document.getElementById('searchResults');
+const searchResultsContent = document.getElementById('searchResultsContent');
+const searchOverlay = document.getElementById('searchOverlay');
+const closeSearchResults = document.getElementById('closeSearchResults');
+const prevResultBtn = document.getElementById('prevResult');
+const nextResultBtn = document.getElementById('nextResult');
+const searchResultsCount = document.getElementById('searchResultsCount');
+const searchSuggestions = document.getElementById('searchSuggestions');
+
+let searchResultsList = [];
+let currentResultIndex = -1;
+let allSearchableText = [];
+
+// Preload all searchable text
+function preloadSearchableText() {
+  const contentElements = document.querySelectorAll('.wiki-tabpanel .body, .ln-chapter-list li, .card, .section .head h2');
+  allSearchableText = Array.from(contentElements).map(el => ({
+    text: el.textContent.toLowerCase(),
+    element: el
+  }));
+}
+
+// Toggle search input
+searchToggle.addEventListener('click', () => {
+  searchInput.classList.toggle('active');
+  if (searchInput.classList.contains('active')) {
+    searchInput.focus();
+  }
+});
+
+// Search functionality
+searchInput.addEventListener('keyup', (e) => {
+  if (e.key === 'Enter') {
+    performSearch(searchInput.value.trim());
+  }
+});
+
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.trim().toLowerCase();
+  updateSearchSuggestions(query);
+});
+
+// Close search results
+closeSearchResults.addEventListener('click', closeSearch);
+searchOverlay.addEventListener('click', closeSearch);
+
+// Navigation between results
+prevResultBtn.addEventListener('click', () => navigateResults(-1));
+nextResultBtn.addEventListener('click', () => navigateResults(1));
+
+// Close search with Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeSearch();
+    searchSuggestions.style.display = 'none';
+  }
+});
+
+// Close suggestions when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-container')) {
+    searchSuggestions.style.display = 'none';
+  }
+});
+
+function updateSearchSuggestions(query) {
+  searchSuggestions.innerHTML = '';
+  
+  if (query.length < 2) {
+    searchSuggestions.style.display = 'none';
+    return;
+  }
+  
+  const matches = allSearchableText
+    .filter(item => item.text.includes(query))
+    .slice(0, 5); // Limit to 5 suggestions
+  
+  if (matches.length > 0) {
+    matches.forEach(match => {
+      const suggestionItem = document.createElement('div');
+      suggestionItem.className = 'search-suggestion-item';
+      
+      // Highlight the matching text
+      const startIndex = match.text.indexOf(query);
+      const endIndex = startIndex + query.length;
+      const beforeMatch = match.text.substring(0, startIndex);
+      const matchedText = match.text.substring(startIndex, endIndex);
+      const afterMatch = match.text.substring(endIndex);
+      
+      suggestionItem.innerHTML = `
+        ${beforeMatch}<mark>${matchedText}</mark>${afterMatch.substring(0, 60 - beforeMatch.length)}...
+      `;
+      
+      suggestionItem.addEventListener('click', () => {
+        searchInput.value = match.text;
+        searchSuggestions.style.display = 'none';
+        performSearch(match.text);
+      });
+      
+      searchSuggestions.appendChild(suggestionItem);
+    });
+    searchSuggestions.style.display = 'block';
+  } else {
+    searchSuggestions.style.display = 'none';
+  }
+}
+
+function performSearch(query) {
+  if (!query) return;
+  
+  searchResultsList = [];
+  const searchTerms = query.toLowerCase().split(' ');
+  
+  // Search through all content sections
+  allSearchableText.forEach(item => {
+    const text = item.text;
+    const matchesAllTerms = searchTerms.every(term => text.includes(term));
+    
+    if (matchesAllTerms) {
+      let context = '';
+      let source = '';
+      
+      // Determine the source of the content
+      const tabPanel = item.element.closest('.wiki-tabpanel');
+      if (tabPanel) {
+        const tabName = Object.keys(panels).find(key => panels[key] === tabPanel);
+        source = document.querySelector(`.wiki-tab[data-tab="${tabName}"]`).textContent;
+      }
+      
+      // Get context around the match
+      const fullText = item.element.textContent;
+      const matchIndex = fullText.toLowerCase().indexOf(searchTerms[0]);
+      const start = Math.max(0, matchIndex - 50);
+      const end = Math.min(fullText.length, matchIndex + searchTerms[0].length + 100);
+      context = fullText.substring(start, end);
+      if (start > 0) context = '...' + context;
+      if (end < fullText.length) context = context + '...';
+      
+      // Highlight the search terms in context
+      searchTerms.forEach(term => {
+        const regex = new RegExp(term, 'gi');
+        context = context.replace(regex, '<mark>$&</mark>');
+      });
+      
+      searchResultsList.push({
+        element: item.element,
+        context: context,
+        source: source,
+        title: item.element.closest('.section') ? item.element.closest('.section').querySelector('h2').textContent : 'Hasil Pencarian'
+      });
+    }
+  });
+  
+  // Display results
+  displaySearchResults(query);
+}
+
+function displaySearchResults(query) {
+  if (searchResultsList.length === 0) {
+    searchResultsContent.innerHTML = `
+      <div class="search-no-results">
+        <p>Tidak ada hasil ditemukan untuk "<strong>${query}</strong>"</p>
+        <p>Coba gunakan kata kunci yang lebih umum atau periksa ejaan.</p>
+      </div>
+    `;
+  } else {
+    searchResultsContent.innerHTML = '';
+    searchResultsList.forEach((result, index) => {
+      const resultItem = document.createElement('div');
+      resultItem.className = 'search-result-item';
+      resultItem.innerHTML = `
+        <h3>${result.title}</h3>
+        <p>${result.context}</p>
+        <div class="search-result-source">Ditemukan di: ${result.source}</div>
+      `;
+      resultItem.addEventListener('click', () => {
+        navigateToResult(index);
+      });
+      searchResultsContent.appendChild(resultItem);
+    });
+  }
+  
+  searchResultsCount.textContent = `${searchResultsList.length} hasil`;
+  updateNavigationButtons();
+  
+  // Show results panel
+  searchResults.classList.add('active');
+  searchOverlay.classList.add('active');
+  
+  // Scroll to first result
+  if (searchResultsList.length > 0) {
+    currentResultIndex = 0;
+    highlightCurrentResult();
+  }
+}
+
+function navigateResults(direction) {
+  if (searchResultsList.length === 0) return;
+  
+  currentResultIndex += direction;
+  
+  if (currentResultIndex < 0) {
+    currentResultIndex = searchResultsList.length - 1;
+  } else if (currentResultIndex >= searchResultsList.length) {
+    currentResultIndex = 0;
+  }
+  
+  highlightCurrentResult();
+}
+
+function highlightCurrentResult() {
+  // Remove highlight from all results
+  document.querySelectorAll('.search-result-item').forEach(item => {
+    item.style.borderLeftColor = 'transparent';
+  });
+  
+  // Highlight current result
+  if (currentResultIndex >= 0 && currentResultIndex < searchResultsList.length) {
+    const currentItem = document.querySelectorAll('.search-result-item')[currentResultIndex];
+    currentItem.style.borderLeftColor = '#6cf';
+    currentItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  
+  updateNavigationButtons();
+}
+
+function updateNavigationButtons() {
+  prevResultBtn.disabled = searchResultsList.length <= 1;
+  nextResultBtn.disabled = searchResultsList.length <= 1;
+}
+
+function navigateToResult(index) {
+  closeSearch();
+  
+  const result = searchResultsList[index];
+  
+  // Find which tab the result is in and activate it
+  const tabPanel = result.element.closest('.wiki-tabpanel');
+  if (tabPanel) {
+    const tabName = Object.keys(panels).find(key => panels[key] === tabPanel);
+    const tab = document.querySelector(`.wiki-tab[data-tab="${tabName}"]`);
+    if (tab) {
+      tab.click();
+    }
+  }
+  
+  // Expand the section if it's collapsible
+  const section = result.element.closest('.section');
+  if (section) {
+    const head = section.querySelector('.head');
+    if (head && !section.querySelector('.body').classList.contains('open')) {
+      head.click();
+    }
+  }
+  
+  // Scroll to the element
+  setTimeout(() => {
+    result.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Add temporary highlight
+    const originalBackground = result.element.style.backgroundColor;
+    result.element.style.backgroundColor = 'rgba(102, 204, 255, 0.2)';
+    setTimeout(() => {
+      result.element.style.backgroundColor = originalBackground;
+    }, 2000);
+  }, 300);
+}
+
+function closeSearch() {
+  searchResults.classList.remove('active');
+  searchOverlay.classList.remove('active');
+  searchInput.value = '';
+  searchInput.classList.remove('active');
+  currentResultIndex = -1;
+}
+
+// Initialize search functionality
+preloadSearchableText();
+</script>
+
+</body>
+</html>
